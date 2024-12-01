@@ -1,13 +1,19 @@
 package Transaction;
 
+import java.time.LocalDate;
 import java.util.Scanner;
 
 public class Debit {
-    private static double balance = 0; // Shared balance variable
-    private double debit = 0;
-    private String description = "";
+    private double debit;
+    private String description;
+    private static double balance; // Shared balance between debit and credit
 
-    Scanner k = new Scanner(System.in);
+    Scanner scanner = new Scanner(System.in);
+
+    public Debit() {
+        this.debit = 0;
+        this.description = "";
+    }
 
     public double getDebit() {
         return debit;
@@ -15,14 +21,6 @@ public class Debit {
 
     public void setDebit(double debit) {
         this.debit = debit;
-    }
-
-    public static double getBalance() { // Static method to access shared balance
-        return balance;
-    }
-
-    public static void setBalance(double balance) { // Static method to modify shared balance
-        Debit.balance = balance;
     }
 
     public String getDescription() {
@@ -33,19 +31,31 @@ public class Debit {
         this.description = description;
     }
 
-    public void debitDetail() {
-        System.out.println("Enter amount: ");
-        debit = k.nextDouble(); // The debit needs to be a positive amount
+    public static double getBalance() {
+        return balance;
+    }
+
+    public static void setBalance(double balance) {
+        Debit.balance = balance;
+    }
+
+    // Method to record a debit transaction
+    public Transaction recordDebit() {
+        System.out.println("Enter debit amount: ");
+        debit = scanner.nextDouble();
         if (debit <= 0) {
             System.out.println("Debit amount must be positive!");
-            return;
+            return null;
         }
-        balance += debit; // Update shared balance
-        System.out.println("Enter description: ");
-        k.nextLine(); // Consume the leftover newline
-        description = k.nextLine();
 
-        System.out.println("Debit Successfully Recorded!!!");
-        System.out.println("New Balance: " + balance);
+        System.out.println("Enter description: ");
+        scanner.nextLine(); // Clear buffer
+        description = scanner.nextLine();
+
+        balance += debit;
+
+        System.out.println("Debit Successfully Recorded!");
+        return new Transaction(LocalDate.now(), description, debit, 0, balance);
     }
 }
+
