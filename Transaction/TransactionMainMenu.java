@@ -46,7 +46,7 @@ public class TransactionMainMenu {
                     System.out.println("== Deposit Interest Predictor ==");
                     break;
                 case "7":
-                    System.out.println("Thank you for using \" Ledger System Algonauts \"");
+                    System.out.println("Thank you for using \" Ledger System AlgoNauts \"");
                     loop = false;
                     break;      
                 default:
