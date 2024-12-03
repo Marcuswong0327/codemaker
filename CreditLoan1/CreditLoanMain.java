@@ -1,4 +1,4 @@
-package CreditLoan;
+package CreditLoan1;
 
 import java.util.Scanner;
 
