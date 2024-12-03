@@ -1,3 +1,5 @@
+package CreditLoan;
+
 import java.util.Scanner;
 
 public class CreditLoanMain {

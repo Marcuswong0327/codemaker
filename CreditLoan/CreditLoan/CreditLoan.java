@@ -1,3 +1,4 @@
+package CreditLoan;
 import java.text.DecimalFormat;
 
 public class CreditLoan {
