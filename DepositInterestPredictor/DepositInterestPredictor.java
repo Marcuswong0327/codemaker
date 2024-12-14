@@ -93,7 +93,7 @@ public class DepositInterestPredictor {
             System.out.print("Do you want to make another prediction? (yes/no): ");
             String choice = scanner.next();
             if (!choice.equalsIgnoreCase("yes")) {
-                System.out.println("Exiting Deposit Interest Predictor...");
+                System.out.println("Goodbye!");
                 break;
             }
         }
