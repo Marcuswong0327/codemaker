@@ -45,13 +45,13 @@ public class CreditLoan {
     // Repay loan
     public void repayLoan(double paymentAmount) {
         if (isLoanPaid) {
-            System.out.println("\nLoan has already been paid in full.");
+            System.out.println("\nYour loan is already fully paid.");
             return;
         }
         amountPaid += paymentAmount;
         if (amountPaid >= totalRepayment) {
             isLoanPaid = true;
-            System.out.println("\nLoan fully repaid!");
+            System.out.println("\nYour loan is already fully paid.");
         }
         System.out.println("\nAmount Paid: " + df.format(amountPaid));
         System.out.println("Remaining Amount: " + df.format(totalRepayment - amountPaid));
