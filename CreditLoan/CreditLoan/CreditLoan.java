@@ -51,7 +51,8 @@ public class CreditLoan {
         amountPaid += paymentAmount;
         if (amountPaid >= totalRepayment) {
             isLoanPaid = true;
-            System.out.println("\nYour loan is already fully paid.");
+            amountPaid = totalRepayment;
+            System.out.println("\nLoan fully repaid!");
         }
         System.out.println("\nAmount Paid: " + df.format(amountPaid));
         System.out.println("Remaining Amount: " + df.format(totalRepayment - amountPaid));
