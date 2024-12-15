@@ -6,10 +6,10 @@ import java.util.List;
 
 public class TransactionCSV {
 
-    private static final String FILE_PATH = "transaction.csv";
+    private static final String filePath = "C:\\Users\\tzeha\\Desktop\\LedgerSystem\\data\\transaction.csv";
 
     public static void exportTransactions(List<Transaction> transactions) {
-        try (FileWriter writer = new FileWriter(FILE_PATH)) {
+        try (FileWriter writer = new FileWriter(filePath)) {
             // Write the header
             writer.write("Date,Description,Debit,Credit,Balance\n");
 
