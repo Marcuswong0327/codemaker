@@ -69,8 +69,8 @@ public class App {
         System.out.print("Enter your choice: ");
     }
 
-    private void debit(Scanner scanner) {
-        System.out.print("Enter the amount to debit: ");
+    private void credit(Scanner scanner) {
+        System.out.print("Enter the amount to credit: ");
         double amount = scanner.nextDouble();
         scanner.nextLine(); // Consume newline
 
@@ -80,18 +80,18 @@ public class App {
         }
 
         balance -= amount;
-        addTransaction("Debit", amount, 0.0);
-        System.out.println("Debit successful!");
+        addTransaction("credit", amount, 0.0);
+        System.out.println("Credit successful!");
     }
 
-    private void credit(Scanner scanner) {
-        System.out.print("Enter the amount to credit: ");
+    private void debit(Scanner scanner) {
+        System.out.print("Enter the amount to debit: ");
         double amount = scanner.nextDouble();
         scanner.nextLine(); // Consume newline
 
         balance += amount;
-        addTransaction("Credit", 0.0, amount);
-        System.out.println("Credit successful!");
+        addTransaction("debit", 0.0, amount);
+        System.out.println("debit successful!");
     }
 
     private void viewTransactionHistory() {
