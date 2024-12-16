@@ -1,8 +1,11 @@
 package Transaction;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
-public class Transaction {
+public class Transaction implements Serializable {
+    private static final long serialVersionUID = 1L; // Recommended for Serializable classes
+
     private LocalDate date;
     private String description;
     private double debit;
@@ -37,4 +40,5 @@ public class Transaction {
         return balance;
     }
 }
+
 
