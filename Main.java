@@ -1,7 +1,4 @@
 import java.util.Scanner;
-import java.time.LocalDate;
-
-// Import necessary classes from your package structure
 import Transaction.Credit;
 import Transaction.Debit;
 import Transaction.Transaction;
@@ -14,6 +11,9 @@ public class Main {
 
         // Create an instance of TransactionHistory to manage transactions
         TransactionHistory transactionHistory = new TransactionHistory();
+        
+        // Create an instance of SavingsSettings to handle savings features
+        SavingsSettings savingsSettings = new SavingsSettings();
 
         do {
             System.out.println("\n== Transaction Menu ==");
@@ -35,7 +35,8 @@ public class Main {
                     Transaction debitTransaction = debit.recordDebit(); // Record a debit transaction
                     if (debitTransaction != null) {
                         transactionHistory.addTransaction(debitTransaction);
-                        System.out.println("Debit transaction recorded successfully.");
+                        System.out.println();
+                        System.out.println("Debit successfully recorded!");
                     } else {
                         System.out.println("Debit transaction failed.");
                     }
@@ -47,20 +48,22 @@ public class Main {
                     Transaction creditTransaction = credit.recordCredit(); // Record a credit transaction
                     if (creditTransaction != null) {
                         transactionHistory.addTransaction(creditTransaction);
-                        System.out.println("Credit transaction recorded successfully.");
+                        System.out.println();
+                        System.out.println("Credit successfully recorded!");
                     } else {
                         System.out.println("Credit transaction failed.");
                     }
                     break;
 
                 case "3":
-                    System.out.println("\n== Transaction History ==");
+                    System.out.println("\n== History ==");
                     transactionHistory.viewTransactionHistory();
                     break;
 
                 case "4":
                     System.out.println("\n== Savings ==");
-                    System.out.println("Savings feature under development.");
+                    // Handle savings settings (activation, saving percentage, etc.)
+                    savingsSettings.activateSavingsFlow();
                     break;
 
                 case "5":
@@ -92,5 +95,6 @@ public class Main {
         k.close();
     }
 }
+
 
 

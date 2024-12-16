@@ -5,21 +5,19 @@ public class SavingsSettings {
     private boolean isSavingsActive = false; // Tracks if savings is activated
     private int savingsPercentage = 0;      // Percentage to save from debit
     private double totalSavings = 0.0;      // Accumulated savings
-    private double mainBalance = 1000.0;    // Initial main balance
+    private double mainBalance = 0.0;    // Initial main balance
 
-    public static void main(String[] args) {
-        SavingsSettings savingsSettings = new SavingsSettings();
+    public void activateSavingsFlow() {
         Scanner scanner = new Scanner(System.in);
 
         // Activate savings
-        System.out.println("== Savings ==");
-        System.out.print("Are you sure you want to activate it? (Y/N): ");
+        System.out.print("Are you sure you want to activate savings? (Y/N): ");
         String choice = scanner.nextLine().trim().toUpperCase();
 
         if (choice.equals("Y")) {
-            System.out.print("Please enter the percentage you wish to deduct from the next debit: ");
+            System.out.print("Please enter the percentage you wish to save from each debit: ");
             int percentage = scanner.nextInt();
-            savingsSettings.activateSavings(percentage);
+            activateSavings(percentage);
         } else {
             System.out.println("Savings not activated.");
             return;
@@ -27,19 +25,17 @@ public class SavingsSettings {
 
         // Process debits
         while (true) {
-            System.out.println("\nCurrent Main Balance: " + savingsSettings.mainBalance);
-            System.out.println("Enter debit amount (or -1 to simulate end of month): ");
+            System.out.println("\nCurrent Main Balance: " + mainBalance);
+            System.out.print("Enter debit amount (or -1 to simulate end of month): ");
             double debitAmount = scanner.nextDouble();
 
             if (debitAmount == -1) {
-                savingsSettings.autoTransferSavingsToBalance();
+                autoTransferSavingsToBalance();
                 break;
             }
 
-            savingsSettings.processDebit(debitAmount);
+            processDebit(debitAmount);
         }
-
-        scanner.close();
     }
 
     public void activateSavings(int percentage) {
@@ -49,12 +45,12 @@ public class SavingsSettings {
         }
         this.isSavingsActive = true;
         this.savingsPercentage = percentage;
-        System.out.println("Savings Settings added successfully!!!");
+        System.out.println("Savings activated successfully!");
     }
 
     public void processDebit(double debitAmount) {
         if (!isSavingsActive) {
-            System.out.println("Savings is not activated. Debit processed without savings.");
+            System.out.println("Savings not activated. Debit processed without savings.");
             mainBalance -= debitAmount;
             return;
         }
@@ -71,15 +67,14 @@ public class SavingsSettings {
         mainBalance -= remainingDebit;
 
         System.out.println("Transaction processed.");
-        System.out.printf("Saved:%.2f%n " ,savingsFromDebit);
+        System.out.printf("Saved: %.2f%n", savingsFromDebit);
         System.out.printf("Remaining Main Balance: %.2f%n", mainBalance);
-
     }
 
     public void autoTransferSavingsToBalance() {
         System.out.println("\nEnd of the month. Transferring savings to main balance...");
         mainBalance += totalSavings;
-        System.out.printf("Total Savings Transferred: %.2f%n " , totalSavings);
+        System.out.printf("Total Savings Transferred: %.2f%n", totalSavings);
         System.out.printf("New Main Balance: %.2f%n", mainBalance);
         totalSavings = 0.0;  // Reset savings for the next month
     }
