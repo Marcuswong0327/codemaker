@@ -10,10 +10,10 @@ public class Main {
         String key = "";
 
         // Create an instance of TransactionHistory to manage transactions
-        TransactionHistory transactionHistory = new TransactionHistory();
+        TransactionHistory transactionHistory = new TransactionHistory(1000.00);  // Initialize with a balance (e.g., 1000)
         
         // Create an instance of SavingsSettings to handle savings features
-        SavingsSettings savingsSettings = new SavingsSettings();
+        SavingsSettings savingsSettings = new SavingsSettings(transactionHistory);  // Link with TransactionHistory
 
         do {
             System.out.println("\n== Transaction Menu ==");
@@ -35,7 +35,6 @@ public class Main {
                     Transaction debitTransaction = debit.recordDebit(); // Record a debit transaction
                     if (debitTransaction != null) {
                         transactionHistory.addTransaction(debitTransaction);
-                        System.out.println();
                         System.out.println("Debit successfully recorded!");
                     } else {
                         System.out.println("Debit transaction failed.");
@@ -48,7 +47,6 @@ public class Main {
                     Transaction creditTransaction = credit.recordCredit(); // Record a credit transaction
                     if (creditTransaction != null) {
                         transactionHistory.addTransaction(creditTransaction);
-                        System.out.println();
                         System.out.println("Credit successfully recorded!");
                     } else {
                         System.out.println("Credit transaction failed.");
@@ -95,6 +93,7 @@ public class Main {
         k.close();
     }
 }
+
 
 
 
