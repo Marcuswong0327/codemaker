@@ -7,8 +7,7 @@ import src.Transaction.Debit;
 import src.Transaction.Transaction;
 import src.Savings.savings.SavingsSettings;
 import src.TransactionHistory;
-import src.CreditLoan.CreditLoan.*;
-import src.DepositInterestPredictor;
+import src.CreditLoan.CreditLoan.CreditLoan;
 
 public class Main {
     public static void main(String[] args) {
@@ -23,6 +22,12 @@ public class Main {
 
         // CreditLoan system
         CreditLoan creditLoan = null;  // Reference to track user's credit loan
+
+        System.out.print("Enter your user name: ");
+        String userName = k.next();
+        // Display user account welcome screen
+        System.out.println("\n== Welcome, " + userName + " ==");
+        displayAccountSummary(transactionHistory, savingsSettings, creditLoan);
 
         do {
             System.out.println("\n== Transaction Menu ==");
@@ -40,8 +45,8 @@ public class Main {
             switch (key) {
                 case "1":
                     System.out.println("\n== Debit ==");
-                    Debit debit = new Debit(savingsSettings);  // Pass savingsSettings to Debit
-                    Transaction debitTransaction = debit.recordDebit(); // Record a debit transaction
+                    Debit debit = new Debit(savingsSettings);
+                    Transaction debitTransaction = debit.recordDebit();
                     if (debitTransaction != null) {
                         transactionHistory.addTransaction(debitTransaction);
                         System.out.println("Debit successfully recorded!");
@@ -53,7 +58,7 @@ public class Main {
                 case "2":
                     System.out.println("\n== Credit ==");
                     Credit credit = new Credit();
-                    Transaction creditTransaction = credit.recordCredit(); // Record a credit transaction
+                    Transaction creditTransaction = credit.recordCredit();
                     if (creditTransaction != null) {
                         transactionHistory.addTransaction(creditTransaction);
                         System.out.println("Credit successfully recorded!");
@@ -82,7 +87,7 @@ public class Main {
 
                 case "6":
                     System.out.println("\n== Deposit Interest Predictor ==");
-                    DepositInterestPredictor.main(null); // Invoke DepositInterestPredictor feature
+                    DepositInterestPredictor.main(new String[]{}); // Call the Deposit Interest Predictor
                     break;
 
                 case "7":
@@ -95,12 +100,9 @@ public class Main {
                     break;
             }
 
-            // Save the transaction history after every operation
-            transactionHistory.saveTransactionHistory();
-
+            transactionHistory.saveTransactionHistory(); // Save transaction history after every operation
         } while (loop);
 
-        // Close the scanner
         k.close();
     }
 
@@ -115,7 +117,7 @@ public class Main {
         int months = scanner.nextInt();
 
         CreditLoan newLoan = new CreditLoan(loanAmount, interestRate, months);
-        newLoan.loan(); // Display loan details
+        newLoan.loan();
         return newLoan;
     }
 
@@ -140,6 +142,17 @@ public class Main {
             } else {
                 System.out.println("Invalid option. Try again.");
             }
+        }
+    }
+
+    // Display the account balance summary
+    public static void displayAccountSummary(TransactionHistory transactionHistory, SavingsSettings savings, CreditLoan loan) {
+        System.out.println("\nBalance: " + String.format("%.2f", transactionHistory.getCurrentBalance()));
+        System.out.println("Savings: " + String.format("%.2f", savings.getSavingsBalance()));
+        if (loan != null) {
+            System.out.println("Loan: " + String.format("%.2f", loan.getRemainingLoanAmount()));
+        } else {
+            System.out.println("Loan: 0.00");
         }
     }
 }

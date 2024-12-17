@@ -81,4 +81,9 @@ public class CreditLoan {
         System.out.println("Remaining Balance: " + df.format(totalRepayment - amountPaid));
         System.out.println("----------------------\n");
     }
+
+    // Getter for the remaining loan amount
+    public double getRemainingLoanAmount() {
+        return totalRepayment - amountPaid;
+    }
 }

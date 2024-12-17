@@ -131,7 +131,13 @@ public class SavingsSettings {
     public double getTotalSavings() {
         return totalSavings;
     }
+
+    // Getter for savings balance to be used in Main.java
+    public double getSavingsBalance() {
+        return totalSavings;
+    }
 }
+
 
 
 
