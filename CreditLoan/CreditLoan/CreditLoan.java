@@ -31,8 +31,8 @@ public class CreditLoan {
         this.monthlyPayment = calculateMonthlyPayment();
         this.totalRepayment = monthlyPayment * months;
         this.loanStartDate = LocalDate.now(); // Default to current date
-        //this.nextPaymentDate = loanStartDate.plusMonths(1); // Next payment is one month after loan start date
-        this.nextPaymentDate = LocalDate.now(); // Today
+        this.nextPaymentDate = loanStartDate.plusMonths(1); // Next payment is one month after loan start date
+        //this.nextPaymentDate = LocalDate.now(); // Today(testing purpose)
     }
 
     // Calculate monthly payment using loan amortization formula
