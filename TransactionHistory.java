@@ -37,27 +37,26 @@ public class TransactionHistory {
 
     // View the complete transaction history with running balance
     public void viewTransactionHistory() {
-        System.out.println("\n== Transaction History ==");
+        System.out.println("\n== History ==");
         System.out.printf("%-15s %-20s %-10s %-10s %-10s\n", "Date", "Description", "Debit", "Credit", "Balance");
 
         if (transactions.isEmpty()) {
             System.out.println("No transaction history available.");
         } else {
-            double runningBalance = initialBalance; // Start with the initial balance
+            double currentBalance = 0.0;  // Variable to hold current balance
             for (Transaction t : transactions) {
-                // Update running balance based on transaction type
+                // Update the current balance based on transaction type
                 if (t.getType() == Transaction.TransactionType.DEBIT) {
-                    runningBalance -= t.getAmount();
+                    currentBalance += t.getAmount();
                 } else if (t.getType() == Transaction.TransactionType.CREDIT) {
-                    runningBalance += t.getAmount();
+                    currentBalance -= t.getAmount();
                 }
-
-                // Print each transaction with its running balance
+                // Print each transaction with the updated balance
                 System.out.printf("%-15s %-20s %-10.2f %-10.2f %-10.2f\n",
                         t.getDate(), t.getDescription(),
                         t.getType() == Transaction.TransactionType.DEBIT ? t.getAmount() : 0.0,
                         t.getType() == Transaction.TransactionType.CREDIT ? t.getAmount() : 0.0,
-                        runningBalance);
+                        currentBalance);  // Use the running balance
             }
         }
 
