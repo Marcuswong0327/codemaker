@@ -1,4 +1,7 @@
+package src.Savings.savings;
+
 import java.util.Scanner;
+import src.TransactionHistory;
 
 public class SavingsSettings {
 
@@ -16,21 +19,22 @@ public class SavingsSettings {
     public void activateSavingsFlow() {
         Scanner scanner = new Scanner(System.in);
 
-        // Activate savings
-        System.out.print("Do you want to activate savings? (Y/N): ");
-        String choice = scanner.nextLine().trim().toUpperCase();
+        if (!isSavingsActive) {
+            System.out.print("Do you want to activate savings? (Y/N): ");
+            String choice = scanner.nextLine().trim().toUpperCase();
 
-        if (choice.equals("Y")) {
-            System.out.print("Enter default savings percentage (0-100): ");
-            int percentage = scanner.nextInt();
-            activateSavings(percentage);
+            if (choice.equals("Y")) {
+                System.out.print("Enter default savings percentage (0-100): ");
+                int percentage = getValidPercentage(scanner);
+                activateSavings(percentage);
+            } else {
+                System.out.println("Savings not activated.");
+            }
         } else {
-            System.out.println("Savings not activated.");
-            return;
+            System.out.println("Savings already activated with " + savingsPercentage + "%.");
         }
 
-        // Process debit transactions or end-of-month transfers
-        while (true) {
+        while (isSavingsActive) {
             System.out.println("\nCurrent Balance: " + transactionHistory.getCurrentBalance());
             System.out.print("Enter debit amount (or -1 to simulate end of month): ");
             double debitAmount = scanner.nextDouble();
@@ -40,19 +44,24 @@ public class SavingsSettings {
                 break;
             }
 
-            // Adjust savings percentage per transaction
-            System.out.println("Current savings percentage: " + savingsPercentage + "%");
-            System.out.print("Change savings percentage for this transaction? (Y/N): ");
-            String changeChoice = scanner.next().trim().toUpperCase();
-
-            if (changeChoice.equals("Y")) {
-                System.out.print("Enter new savings percentage: ");
-                int newPercentage = scanner.nextInt();
-                savingsPercentage = newPercentage;
-            }
-
             processDebit(debitAmount);
         }
+    }
+
+    // Helper method to get valid percentage input
+    private int getValidPercentage(Scanner scanner) {
+        int percentage = -1;
+        while (percentage < 0 || percentage > 100) {
+            try {
+                percentage = Integer.parseInt(scanner.nextLine().trim());
+                if (percentage < 0 || percentage > 100) {
+                    System.out.println("Please enter a valid percentage between 0 and 100.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number between 0 and 100.");
+            }
+        }
+        return percentage;
     }
 
     // Activate savings with a specified percentage
@@ -75,17 +84,20 @@ public class SavingsSettings {
         }
 
         double savingsFromDebit = (debitAmount * savingsPercentage) / 100;
-        double remainingDebit = debitAmount - savingsFromDebit;
+        double remainingDebit = debitAmount;
 
         if (remainingDebit > transactionHistory.getCurrentBalance()) {
             System.out.println("Insufficient balance for this transaction.");
             return;
         }
 
+        // Deduct the savings and add to totalSavings
         totalSavings += savingsFromDebit;
+        remainingDebit -= savingsFromDebit;
+
+        // Update transaction history with adjusted debit
         transactionHistory.updateBalance(transactionHistory.getCurrentBalance() - remainingDebit);
 
-        System.out.println("Transaction processed.");
         System.out.printf("Saved: %.2f%n", savingsFromDebit);
         System.out.printf("Remaining Balance: %.2f%n", transactionHistory.getCurrentBalance());
     }
@@ -109,7 +121,19 @@ public class SavingsSettings {
             System.out.println("Savings feature is not active.");
         }
     }
+
+    // Getter for savings percentage
+    public int getSavingsPercentage() {
+        return savingsPercentage;
+    }
+
+    // Getter for total savings (for testing purposes)
+    public double getTotalSavings() {
+        return totalSavings;
+    }
 }
+
+
 
 
 

@@ -1,8 +1,10 @@
+package src;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import Transaction.Transaction;
+import src.Transaction.Transaction;
 
 import java.time.LocalDate;
 
@@ -26,9 +28,9 @@ public class TransactionHistory {
 
         // Update balance based on transaction type
         if (transaction.getType() == Transaction.TransactionType.DEBIT) {
-            currentBalance -= transaction.getAmount();
-        } else if (transaction.getType() == Transaction.TransactionType.CREDIT) {
             currentBalance += transaction.getAmount();
+        } else if (transaction.getType() == Transaction.TransactionType.CREDIT) {
+            currentBalance -= transaction.getAmount();
         }
 
         // Save updated transaction list to file
@@ -93,9 +95,9 @@ public class TransactionHistory {
             for (Transaction t : transactions) {
                 // Update the running balance
                 if (t.getType() == Transaction.TransactionType.DEBIT) {
-                    runningBalance -= t.getAmount();
-                } else if (t.getType() == Transaction.TransactionType.CREDIT) {
                     runningBalance += t.getAmount();
+                } else if (t.getType() == Transaction.TransactionType.CREDIT) {
+                    runningBalance -= t.getAmount();
                 }
 
                 // Write transaction details to the CSV file
@@ -117,9 +119,9 @@ public class TransactionHistory {
         currentBalance = initialBalance; // Reset to the initial balance
         for (Transaction t : transactions) {
             if (t.getType() == Transaction.TransactionType.DEBIT) {
-                currentBalance -= t.getAmount();
-            } else if (t.getType() == Transaction.TransactionType.CREDIT) {
                 currentBalance += t.getAmount();
+            } else if (t.getType() == Transaction.TransactionType.CREDIT) {
+                currentBalance -= t.getAmount();
             }
         }
     }

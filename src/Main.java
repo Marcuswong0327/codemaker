@@ -1,7 +1,14 @@
+package src;
+
 import java.util.Scanner;
-import Transaction.Credit;
-import Transaction.Debit;
-import Transaction.Transaction;
+
+import src.Transaction.Credit;
+import src.Transaction.Debit;
+import src.Transaction.Transaction;
+import src.Savings.savings.SavingsSettings;
+import src.TransactionHistory;
+import src.CreditLoan.CreditLoan.*;
+import src.DepositInterestPredictor;
 
 public class Main {
     public static void main(String[] args) {
@@ -10,10 +17,12 @@ public class Main {
         String key = "";
 
         // Create an instance of TransactionHistory to manage transactions
-        TransactionHistory transactionHistory = new TransactionHistory(1000.00);  // Initialize with a balance (e.g., 1000)
-        
+        TransactionHistory transactionHistory = new TransactionHistory(0.00); // Initialize with a balance
         // Create an instance of SavingsSettings to handle savings features
-        SavingsSettings savingsSettings = new SavingsSettings(transactionHistory);  // Link with TransactionHistory
+        SavingsSettings savingsSettings = new SavingsSettings(transactionHistory);
+
+        // CreditLoan system
+        CreditLoan creditLoan = null;  // Reference to track user's credit loan
 
         do {
             System.out.println("\n== Transaction Menu ==");
@@ -31,7 +40,7 @@ public class Main {
             switch (key) {
                 case "1":
                     System.out.println("\n== Debit ==");
-                    Debit debit = new Debit();
+                    Debit debit = new Debit(savingsSettings);  // Pass savingsSettings to Debit
                     Transaction debitTransaction = debit.recordDebit(); // Record a debit transaction
                     if (debitTransaction != null) {
                         transactionHistory.addTransaction(debitTransaction);
@@ -54,24 +63,26 @@ public class Main {
                     break;
 
                 case "3":
-                    System.out.println("\n== History ==");
                     transactionHistory.viewTransactionHistory();
                     break;
 
                 case "4":
                     System.out.println("\n== Savings ==");
-                    // Handle savings settings (activation, saving percentage, etc.)
                     savingsSettings.activateSavingsFlow();
                     break;
 
                 case "5":
                     System.out.println("\n== Credit Loan ==");
-                    System.out.println("Credit loan feature under development.");
+                    if (creditLoan == null) {
+                        creditLoan = handleCreditLoanFlow(k);
+                    } else {
+                        handleCreditLoanOptions(k, creditLoan);
+                    }
                     break;
 
                 case "6":
                     System.out.println("\n== Deposit Interest Predictor ==");
-                    System.out.println("Interest predictor feature under development.");
+                    DepositInterestPredictor.main(null); // Invoke DepositInterestPredictor feature
                     break;
 
                 case "7":
@@ -92,7 +103,48 @@ public class Main {
         // Close the scanner
         k.close();
     }
+
+    // Handles credit loan application flow
+    public static CreditLoan handleCreditLoanFlow(Scanner scanner) {
+        System.out.println("You are applying for a new Credit Loan.");
+        System.out.print("Enter loan amount: ");
+        double loanAmount = scanner.nextDouble();
+        System.out.print("Enter interest rate (%): ");
+        double interestRate = scanner.nextDouble();
+        System.out.print("Enter repayment period (months): ");
+        int months = scanner.nextInt();
+
+        CreditLoan newLoan = new CreditLoan(loanAmount, interestRate, months);
+        newLoan.loan(); // Display loan details
+        return newLoan;
+    }
+
+    // Handles existing loan repayment and viewing loan details
+    public static void handleCreditLoanOptions(Scanner scanner, CreditLoan loan) {
+        while (true) {
+            System.out.println("\n== Loan Options ==");
+            System.out.println("1. Repay Loan");
+            System.out.println("2. View Loan Details");
+            System.out.println("3. Exit Loan Options");
+            System.out.print("> ");
+
+            int loanChoice = scanner.nextInt();
+            if (loanChoice == 1) {
+                System.out.print("Enter repayment amount: ");
+                double repayment = scanner.nextDouble();
+                loan.repayLoan(repayment);
+            } else if (loanChoice == 2) {
+                loan.displayLoanDetails();
+            } else if (loanChoice == 3) {
+                break;
+            } else {
+                System.out.println("Invalid option. Try again.");
+            }
+        }
+    }
 }
+
+
 
 
 

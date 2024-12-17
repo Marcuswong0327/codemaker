@@ -1,4 +1,4 @@
-package CreditLoan;
+package src.CreditLoan.CreditLoan;
 
 import java.text.DecimalFormat;
 
