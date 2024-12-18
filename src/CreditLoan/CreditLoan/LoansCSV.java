@@ -6,32 +6,31 @@ import java.util.List;
 
 public class LoansCSV {
 
-    private static final String filePath = "C:\\Users\\oikay\\OneDrive\\Documents\\FOP\\Assignment\\codemaker\\src\\CreditLoan\\CreditLoan\\Loans.csv";
+    private static final String filePath = "C:\\Users\\oikay\\OneDrive\\Documents\\FOP\\Assignment\\codemaker\\src\\CreditLoan\\CreditLoan\\loans.csv";
 
-    public static void exportLoans(List<LoansRecord> loans) {
+    public static void exportLoans(List<LoansRecord> loanRecords) {
         try (FileWriter writer = new FileWriter(filePath)) {
-            writer.write("Loan ID,User ID,Principal Amount,Interest Rate,Repayment Period,Outstanding Balance,Status,Created At\n");
+            writer.write("LoanId,UserId,LoanAmount,InterestRate,Months,RemainingAmount,Status,LoanStartDate\n");
 
-            for (LoansRecord loan : loans) {
-                System.out.println("Exporting Loan: " + loan.getLoanId() + " | User: " + loan.getUserId());
-                
-                String record = String.format("%d,%s,%.2f,%.2f,%d,%.2f,%s,%s\n",
-                        loan.getLoanId(),
-                        loan.getUserId(),
-                        loan.getPrincipalAmount(),
-                        loan.getInterestRate(),
-                        loan.getRepaymentPeriod(),
-                        loan.getOutstandingBalance(),
-                        loan.getStatus(),
-                        loan.getCreatedAt());
-
-                writer.write(record);
+            for (LoansRecord record : loanRecords) {
+                String recordLine = String.format("%d,%s,%.2f,%.2f,%d,%.2f,%s,%s\n", 
+                        record.getLoanId(),
+                        record.getUserId(),
+                        record.getLoanAmount(),
+                        record.getInterestRate(),
+                        record.getMonths(),
+                        record.getRemainingAmount(),
+                        record.getStatus(),
+                        record.getLoanStartDate());
+                writer.write(recordLine);
             }
 
-            System.out.println("Loan records exported successfully!");
+            System.out.println("Loans data exported successfully!");
+
         } catch (IOException e) {
             System.out.println("Error exporting loans: " + e.getMessage());
         }
     }
 }
+
 

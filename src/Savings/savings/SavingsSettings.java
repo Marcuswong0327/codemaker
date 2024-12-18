@@ -57,6 +57,11 @@ public class SavingsSettings {
         isSavingsActive = true;
         savingsPercentage = percentage;
         System.out.println("Savings activated successfully at " + percentage + "%!");
+        
+        //Export to CSV
+        SavingsCSV savingsCSV = new SavingsCSV();
+        savingsCSV.addSavingsRecord(new SavingsRecord(1, 101, "Active", percentage));  // Example user_id 101
+        savingsCSV.exportSavings();
     }
 
     // Automatically transfer savings to balance at the end of the month

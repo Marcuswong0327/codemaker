@@ -1,2 +1,2 @@
-Loan ID,User ID,Principal Amount,Interest Rate,Repayment Period,Outstanding Balance,Status,Created At
-1,user1,100.00,1.00,3,0.17,Active,2024-12-19
+LoanId,UserId,LoanAmount,InterestRate,Months,RemainingAmount,Status,LoanStartDate
+1,user1,2000.00,5.00,20,1088.65,Active,2024-12-19

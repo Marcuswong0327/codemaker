@@ -1,27 +1,30 @@
 package src.CreditLoan.CreditLoan;
 
+import java.time.LocalDate;
+
 public class LoansRecord {
     private int loanId;
     private String userId;
-    private double principalAmount;
+    private double loanAmount;
     private double interestRate;
-    private int repaymentPeriod;
-    private double outstandingBalance;
-    private String status;
-    private String createdAt;
+    private int months;
+    private double remainingAmount;
+    private String status; // "Active" or "Paid"
+    private String loanStartDate;
 
-    public LoansRecord(int loanId, String userId, double principalAmount, double interestRate,
-                      int repaymentPeriod, double outstandingBalance, String status, String createdAt) {
+    // Constructor
+    public LoansRecord(int loanId, String userId, double loanAmount, double interestRate, int months, double remainingAmount, String status, String loanStartDate) {
         this.loanId = loanId;
         this.userId = userId;
-        this.principalAmount = principalAmount;
+        this.loanAmount = loanAmount;
         this.interestRate = interestRate;
-        this.repaymentPeriod = repaymentPeriod;
-        this.outstandingBalance = outstandingBalance;
+        this.months = months;
+        this.remainingAmount = remainingAmount;
         this.status = status;
-        this.createdAt = createdAt;
+        this.loanStartDate = loanStartDate;
     }
 
+    // Getters for the fields
     public int getLoanId() {
         return loanId;
     }
@@ -30,35 +33,28 @@ public class LoansRecord {
         return userId;
     }
 
-    public double getPrincipalAmount() {
-        return principalAmount;
+    public double getLoanAmount() {
+        return loanAmount;
     }
 
     public double getInterestRate() {
         return interestRate;
     }
 
-    public int getRepaymentPeriod() {
-        return repaymentPeriod;
+    public int getMonths() {
+        return months;
     }
 
-    public double getOutstandingBalance() {
-        return outstandingBalance;
+    public double getRemainingAmount() {
+        return remainingAmount;
     }
 
     public String getStatus() {
         return status;
     }
 
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setOutstandingBalance(double outstandingBalance) {
-        this.outstandingBalance = outstandingBalance;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
+    public String getLoanStartDate() {
+        return loanStartDate;
     }
 }
+

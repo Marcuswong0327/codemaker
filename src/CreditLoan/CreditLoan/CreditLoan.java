@@ -3,6 +3,7 @@ package src.CreditLoan.CreditLoan;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Scanner;
 import javax.swing.JOptionPane;
 
@@ -51,6 +52,12 @@ public class CreditLoan {
         System.out.println("Monthly Payment: " + df.format(monthlyPayment));
         System.out.println("Total Repayment: " + df.format(totalRepayment));
         System.out.println("----------------------\n");
+
+        // Create a LoansRecord for the new loan application
+        LoansRecord loanRecord = new LoansRecord(1, "user1", loanAmount, interestRate, months, totalRepayment - amountPaid, isLoanPaid ? "Paid" : "Active", LocalDate.now().toString());
+
+        // Export the loan to CSV
+        LoansCSV.exportLoans(List.of(loanRecord));  // Add new loan to CSV
     }
 
     // Repay loan
@@ -70,6 +77,12 @@ public class CreditLoan {
 
         // Update the next payment date for next month
         nextPaymentDate = nextPaymentDate.plusMonths(1);
+        
+        // Create an updated LoansRecord for the repaid loan
+        LoansRecord loanRecord = new LoansRecord(1, "user1", loanAmount, interestRate, months, totalRepayment - amountPaid, isLoanPaid ? "Paid" : "Active", LocalDate.now().toString());
+
+        // Export the updated loan status to CSV
+        LoansCSV.exportLoans(List.of(loanRecord));  // Update loan information in CSV
     }
 
 
