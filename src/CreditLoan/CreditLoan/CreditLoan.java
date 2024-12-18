@@ -116,8 +116,18 @@ public class CreditLoan {
         System.out.println("Loan applied successfully!");
     }
 
-        // Getter for the remaining loan amount
     public double getRemainingLoanAmount() {
         return totalRepayment - amountPaid;
+    }
+    public double getLoanAmount() {
+        return loanAmount;
+    }
+
+    public double getInterestRate() {
+        return interestRate;
+    }
+
+    public int getRepaymentPeriod() {
+        return months;
     }
 }

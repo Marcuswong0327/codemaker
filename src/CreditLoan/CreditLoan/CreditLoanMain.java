@@ -1,5 +1,6 @@
 package src.CreditLoan.CreditLoan;
 
+import java.util.List;
 import java.util.Scanner;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
@@ -54,6 +55,9 @@ public class CreditLoanMain {
         // Create a new CreditLoan object
         userLoan = new CreditLoan(loanAmount, interestRate, months);
         userLoan.loan();  // Call loan method instead of applyLoan
+
+        LoansRecord newLoanRecord = new LoansRecord(1, "user1", loanAmount, interestRate, months, 0, "Active", LocalDate.now().toString());
+        LoansCSV.exportLoans(List.of(newLoanRecord));
     }
 
     //Repay
@@ -70,6 +74,10 @@ public class CreditLoanMain {
         System.out.print("Enter repayment amount: ");
         double paymentAmount = scanner.nextDouble();
         userLoan.repayLoan(paymentAmount);
+
+        LoansRecord updatedLoanRecord = new LoansRecord(1, "user1", userLoan.getLoanAmount(), userLoan.getInterestRate(),
+        userLoan.getRepaymentPeriod(), userLoan.getRemainingLoanAmount(), userLoan.isLoanPaid() ? "Paid" : "Active", LocalDate.now().toString());
+        LoansCSV.exportLoans(List.of(updatedLoanRecord));
     }
 
     public static void viewLoanDetails() {
@@ -80,4 +88,5 @@ public class CreditLoanMain {
             userLoan.displayRepaymentReminder();
         }
     }
+    
 }
