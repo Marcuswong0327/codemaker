@@ -30,10 +30,10 @@ public class Main {
         displayAccountSummary(transactionHistory, savingsSettings, creditLoan);
 
         do {
-            System.out.println("\n== Transaction Menu ==");
+            System.out.println("\n== Transaction ==");
             System.out.println("1. Debit");
             System.out.println("2. Credit");
-            System.out.println("3. View Transaction History");
+            System.out.println("3. History");
             System.out.println("4. Savings");
             System.out.println("5. Credit Loan");
             System.out.println("6. Deposit Interest Predictor");
