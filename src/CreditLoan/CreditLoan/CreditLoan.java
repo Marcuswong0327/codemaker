@@ -31,8 +31,9 @@ public class CreditLoan {
         this.monthlyPayment = calculateMonthlyPayment();
         this.totalRepayment = monthlyPayment * months;
         this.loanStartDate = LocalDate.now(); // Default to current date
-        this.nextPaymentDate = loanStartDate.plusMonths(1); // Next payment is one month after loan start date
-        //this.nextPaymentDate = LocalDate.now(); // Today(testing purpose)
+        this.nextPaymentDate = loanStartDate.plusDays(5); // Next payment is in 5days
+        // this.loanStartDate = LocalDate.now(); // Loan start date is today
+        //this.nextPaymentDate = LocalDate.now(); // Next payment is today (for testing)
     }
 
     // Calculate monthly payment using loan amortization formula
@@ -102,7 +103,11 @@ public class CreditLoan {
                         + "Next payment date: " + nextPaymentDate;
                 JOptionPane.showMessageDialog(null, reminderMessage, "Loan Repayment Reminder",
                         JOptionPane.INFORMATION_MESSAGE);
+            }else {
+                System.out.println("Reminder not triggered. Days until repayment: " + daysUntilRepayment); // Debug
             }
+        } else {
+            System.out.println("Loan is already paid. No reminder needed."); // Debug
         }
     }
 
@@ -111,8 +116,18 @@ public class CreditLoan {
         System.out.println("Loan applied successfully!");
     }
 
-        // Getter for the remaining loan amount
     public double getRemainingLoanAmount() {
         return totalRepayment - amountPaid;
+    }
+    public double getLoanAmount() {
+        return loanAmount;
+    }
+
+    public double getInterestRate() {
+        return interestRate;
+    }
+
+    public int getRepaymentPeriod() {
+        return months;
     }
 }
