@@ -1,6 +1,11 @@
 package src.CreditLoan.CreditLoan;
 
 import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.Scanner;
+import javax.swing.JOptionPane;
+
 
 public class CreditLoan {
     private double loanAmount;    // Loan amount
@@ -10,6 +15,8 @@ public class CreditLoan {
     private double totalRepayment; // Total repayment amount
     private double amountPaid;    // Amount paid so far
     private boolean isLoanPaid;   // Whether the loan is paid off
+    private LocalDate loanStartDate; // Loan start date
+    private LocalDate nextPaymentDate; // Next payment date
 
     // Decimal format for two decimal places
     private static final DecimalFormat df = new DecimalFormat("0.00");
@@ -23,6 +30,9 @@ public class CreditLoan {
         this.isLoanPaid = false;
         this.monthlyPayment = calculateMonthlyPayment();
         this.totalRepayment = monthlyPayment * months;
+        this.loanStartDate = LocalDate.now(); // Default to current date
+        this.nextPaymentDate = loanStartDate.plusMonths(1); // Next payment is one month after loan start date
+        //this.nextPaymentDate = LocalDate.now(); // Today(testing purpose)
     }
 
     // Calculate monthly payment using loan amortization formula
@@ -45,19 +55,22 @@ public class CreditLoan {
     // Repay loan
     public void repayLoan(double paymentAmount) {
         if (isLoanPaid) {
-            System.out.println("\nYour loan is already fully paid.");
+            JOptionPane.showMessageDialog(null, "Your loan is already fully paid.", "Loan Status", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
         amountPaid += paymentAmount;
         if (amountPaid >= totalRepayment) {
             isLoanPaid = true;
             amountPaid = totalRepayment;
-            System.out.println("\nLoan fully repaid!");
+            JOptionPane.showMessageDialog(null, "Loan fully repaid!", "Loan Status", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null, "Amount Paid: " + df.format(amountPaid) + "\nRemaining Amount: " + df.format(totalRepayment - amountPaid), "Repayment Status", JOptionPane.INFORMATION_MESSAGE);
         }
-        System.out.println("\nAmount Paid: " + df.format(amountPaid));
-        System.out.println("Remaining Amount: " + df.format(totalRepayment - amountPaid));
-        System.out.println("----------------------\n");
+
+        // Update the next payment date for next month
+        nextPaymentDate = nextPaymentDate.plusMonths(1);
     }
+
 
     // Check if the loan is fully paid
     public boolean isLoanPaid() {
@@ -81,8 +94,24 @@ public class CreditLoan {
         System.out.println("Remaining Balance: " + df.format(totalRepayment - amountPaid));
         System.out.println("----------------------\n");
     }
+    public void displayRepaymentReminder() {
+        if (!isLoanPaid) {
+            long daysUntilRepayment = ChronoUnit.DAYS.between(LocalDate.now(), nextPaymentDate);
+            if (daysUntilRepayment <= 7 && daysUntilRepayment >= 0) {
+                String reminderMessage = "Reminder: Your loan repayment is due in " + daysUntilRepayment + " days!\n"
+                        + "Next payment date: " + nextPaymentDate;
+                JOptionPane.showMessageDialog(null, reminderMessage, "Loan Repayment Reminder",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+    }
 
-    // Getter for the remaining loan amount
+    // Loan method (placeholder)
+    public void applyLoan() {
+        System.out.println("Loan applied successfully!");
+    }
+
+        // Getter for the remaining loan amount
     public double getRemainingLoanAmount() {
         return totalRepayment - amountPaid;
     }

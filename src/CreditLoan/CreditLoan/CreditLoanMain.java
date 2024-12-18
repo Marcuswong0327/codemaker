@@ -1,6 +1,11 @@
 package src.CreditLoan.CreditLoan;
 
 import java.util.Scanner;
+import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.Scanner;
+import javax.swing.JOptionPane;
 
 public class CreditLoanMain {
     private static CreditLoan userLoan = null; // Current user's loan
@@ -72,6 +77,7 @@ public class CreditLoanMain {
             System.out.println("No loan details available.");
         } else {
             userLoan.displayLoanDetails();
+            userLoan.displayRepaymentReminder();
         }
     }
 }
