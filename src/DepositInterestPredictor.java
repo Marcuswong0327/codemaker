@@ -90,9 +90,9 @@ public class DepositInterestPredictor {
             System.out.println("-----------------------------------");
 
             // Ask if the user wants another calculation
-            System.out.print("Do you want to make another prediction? (yes/no): ");
+            System.out.print("Do you want to make another prediction? (y/n): ");
             String choice = scanner.next();
-            if (!choice.equalsIgnoreCase("yes")) {
+            if (!choice.equalsIgnoreCase("y")) {
                 System.out.println("Goodbye!");
                 break;
             }

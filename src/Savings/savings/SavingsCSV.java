@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public class SavingsCSV {
 
-    private static final String filePath = "C:\\Users\\oikay\\OneDrive\\Documents\\FOP\\Assignment\\codemaker\\src\\Savings\\savings\\savings.csv";
+    private static final String filePath = "savings.csv";
 
     private List<SavingsRecord> savingsRecords;
 

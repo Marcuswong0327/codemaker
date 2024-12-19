@@ -1,2 +1,2 @@
 LoanId,UserId,LoanAmount,InterestRate,Months,RemainingAmount,Status,LoanStartDate
-1,user1,2000.00,5.00,20,1088.65,Active,2024-12-19
+1,user1,1000.00,2.00,10,1009.19,Active,2024-12-19

@@ -6,7 +6,7 @@ import java.util.List;
 
 public class LoansCSV {
 
-    private static final String filePath = "C:\\Users\\oikay\\OneDrive\\Documents\\FOP\\Assignment\\codemaker\\src\\CreditLoan\\CreditLoan\\loans.csv";
+    private static final String filePath = "loans.csv";
 
     public static void exportLoans(List<LoansRecord> loanRecords) {
         try (FileWriter writer = new FileWriter(filePath)) {
