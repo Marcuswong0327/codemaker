@@ -68,7 +68,7 @@ public class Main {
                     break;
 
                 case "3":
-                    transactionHistory.viewTransactionHistory();
+                transactionHistory.viewTransactionHistory(k); 
                     break;
 
                 case "4":

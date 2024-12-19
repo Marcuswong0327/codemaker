@@ -3,6 +3,8 @@ package src;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import src.Transaction.Transaction;
 
@@ -21,6 +23,37 @@ public class TransactionHistory {
         this.currentBalance = initialBalance; // Set the starting balance
         loadTransactionHistory();             // Attempt to load existing transaction history
     }
+    public static List<Transaction> filterByDateRange(LocalDate startDate, LocalDate endDate, List<Transaction> transactions) {
+        return transactions.stream()
+                .filter(t -> !t.getDate().isBefore(startDate) && !t.getDate().isAfter(endDate))
+                .collect(Collectors.toList());
+    }
+
+    public static List<Transaction> filterByType(String type, List<Transaction> transactions) {
+        Transaction.TransactionType transactionType = Transaction.TransactionType.valueOf(type.toUpperCase());
+        return transactions.stream()
+                .filter(t -> t.getType() == transactionType)
+                .collect(Collectors.toList());
+    }
+
+    public static List<Transaction> filterByAmountRange(double minAmount, double maxAmount, List<Transaction> transactions) {
+        return transactions.stream()
+                .filter(t -> t.getAmount() >= minAmount && t.getAmount() <= maxAmount)
+                .collect(Collectors.toList());
+    }
+
+    public static List<Transaction> sortByDate(boolean newestFirst, List<Transaction> transactions) {
+        return transactions.stream()
+                .sorted((t1, t2) -> newestFirst ? t2.getDate().compareTo(t1.getDate()) : t1.getDate().compareTo(t2.getDate()))
+                .collect(Collectors.toList());
+    }
+
+    public static List<Transaction> sortByAmount(boolean highestFirst, List<Transaction> transactions) {
+        return transactions.stream()
+                .sorted((t1, t2) -> highestFirst ? Double.compare(t2.getAmount(), t1.getAmount()) : Double.compare(t1.getAmount(), t2.getAmount()))
+                .collect(Collectors.toList());
+    }
+
 
     // Add a new transaction and update the current balance
     public void addTransaction(Transaction transaction) {
@@ -38,10 +71,10 @@ public class TransactionHistory {
     }
 
     // View the complete transaction history with running balance
-    public void viewTransactionHistory() {
+    public void viewTransactionHistory(Scanner scanner) {
         System.out.println("\n== History ==");
         System.out.printf("%-15s %-20s %-10s %-10s %-10s\n", "Date", "Description", "Debit", "Credit", "Balance");
-
+    
         if (transactions.isEmpty()) {
             System.out.println("No transaction history available.");
         } else {
@@ -61,9 +94,96 @@ public class TransactionHistory {
                         currentBalance);  // Use the running balance
             }
         }
-
-        exportHistoryToCSV(); // Export the history to a CSV file
+        exportHistoryToCSV();
+    
+    
+        while (true) {
+            System.out.println("\n1. Filter by Date Range");
+            System.out.println("2. Filter by Transaction Type");
+            System.out.println("3. Filter by Amount Range");
+            System.out.println("4. Sort by Date");
+            System.out.println("5. Sort by Amount");
+            System.out.println("6. Reset Filters");
+            System.out.println("7. Back to Main Menu");
+            System.out.print("> ");
+    
+            int choice = scanner.nextInt();
+            List<Transaction> filteredTransactions = transactions; // 默认显示所有交易
+    
+            switch (choice) {
+                case 1: // 按日期范围过滤
+                    System.out.print("Enter start date (YYYY-MM-DD): ");
+                    LocalDate startDate = LocalDate.parse(scanner.next());
+                    System.out.print("Enter end date (YYYY-MM-DD): ");
+                    LocalDate endDate = LocalDate.parse(scanner.next());
+                    filteredTransactions = TransactionHistory.filterByDateRange(startDate, endDate,transactions);
+                    break;
+    
+                case 2: // 按交易类型过滤
+                    System.out.print("Enter transaction type (debit/credit): ");
+                    String type = scanner.next();
+                    filteredTransactions = TransactionHistory.filterByType(type,transactions);
+                    break;
+    
+                case 3: // 按金额范围过滤
+                    System.out.print("Enter minimum amount: ");
+                    double minAmount = scanner.nextDouble();
+                    System.out.print("Enter maximum amount: ");
+                    double maxAmount = scanner.nextDouble();
+                    filteredTransactions = TransactionHistory.filterByAmountRange(minAmount, maxAmount,transactions);
+                    break;
+    
+                case 4: // 按日期排序
+                    System.out.print("Sort newest first? (true/false): ");
+                    boolean newestFirst = scanner.nextBoolean();
+                    filteredTransactions = TransactionHistory.sortByDate(newestFirst,transactions);
+                    break;
+    
+                case 5: // 按金额排序
+                    System.out.print("Sort highest first? (true/false): ");
+                    boolean highestFirst = scanner.nextBoolean();
+                    filteredTransactions = TransactionHistory.sortByAmount(highestFirst,transactions);
+                    break;
+    
+                case 6: // 重置过滤
+                    filteredTransactions = transactions; // 恢复初始状态
+                    break;
+    
+                case 7: // 返回主菜单
+                    return;
+    
+                default:
+                    System.out.println("Invalid option. Please try again.");
+                    continue;
+            }
+    
+            // 显示过滤或排序后的交易记录
+            if (filteredTransactions.isEmpty()) {
+                System.out.println("No transactions found.");
+            } else {
+                double currentBalance = 0.0;  // Variable to hold current balance
+                for (Transaction t : filteredTransactions) {
+                    // Update the current balance based on transaction type
+                    if (t.getType() == Transaction.TransactionType.DEBIT) {
+                        currentBalance += t.getAmount();
+                    } else if (t.getType() == Transaction.TransactionType.CREDIT) {
+                        currentBalance -= t.getAmount();
+                    }
+                    // Print each transaction with the updated balance
+                    System.out.printf("%-15s %-20s %-10.2f %-10.2f %-10.2f\n",
+                            t.getDate(), t.getDescription(),
+                            t.getType() == Transaction.TransactionType.DEBIT ? t.getAmount() : 0.0,
+                            t.getType() == Transaction.TransactionType.CREDIT ? t.getAmount() : 0.0,
+                            currentBalance);  // Use the running balance
+                }
+            }
+        }
+        
     }
+    
+
+
+
 
     // Save transaction history to a binary file
     public void saveTransactionHistory() {
