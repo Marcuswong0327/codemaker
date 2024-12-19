@@ -1,3 +1,5 @@
+package Visualize;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -9,8 +11,12 @@ import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class DataVisualization {
 
@@ -19,86 +25,172 @@ public class DataVisualization {
             // Paths to CSV files
             String savingsPath = "savings.csv";
             String loansPath = "loans.csv";
-            String transactionsPath = "transaction.csv";
+            String transactionsPath = "transaction_history.csv";
 
             // Read and visualize savings data
             DefaultCategoryDataset savingsDataset = readSavingsData(savingsPath);
-            createBarChart("Savings Growth", "User ID", "Percentage", savingsDataset);
+            createBarChart("Savings Growth", "Savings", "Percentage (%)", savingsDataset);
 
-            // Read and visualize loan data
-            DefaultPieDataset loanDataset = readLoanData(loansPath);
-            createPieChart("Loan Status Distribution", loanDataset);
+            // Read and visualize loan repayment data
+            DefaultCategoryDataset loanRepaymentDataset = readLoanRepaymentData(loansPath);
+            createBarChart("Loan Repayment Over Time", "Date", "Remaining Loan ($)", loanRepaymentDataset);
 
-            // Read and visualize transaction data
-            DefaultCategoryDataset transactionDataset = readTransactionData(transactionsPath);
-            createLineChart("Spending Trends", "Date", "Balance", transactionDataset);
+            // Read and visualize transaction data for spending distribution
+            DefaultPieDataset transactionDataset = readTransactionData(transactionsPath);
+            createPieChart("Spending Distribution (Debit vs Credit)", transactionDataset);
 
+            // Read and visualize total credit per day
+            DefaultCategoryDataset dailyCreditDataset = readDailyCreditData(transactionsPath);
+            createBarChart("Total Credit Per Day", "Date", "Total Credit ($)", dailyCreditDataset);
+
+        } catch (IOException e) {
+            System.out.println("Error reading the CSV file: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("Error parsing numeric values in the CSV file: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("An unexpected error occurred: " + e.getMessage());
         }
     }
 
-    // Method to read savings data
+    // Method to read savings data and label them sequentially
     private static DefaultCategoryDataset readSavingsData(String filePath) throws IOException {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        BufferedReader reader = new BufferedReader(new FileReader(filePath));
-        String line;
-        reader.readLine(); // Skip header
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            reader.readLine(); // Skip the header
 
-        while ((line = reader.readLine()) != null) {
-            String[] fields = line.split(",");
-            String userId = fields[1];
-            double percentage = Double.parseDouble(fields[3]);
-            dataset.addValue(percentage, "Savings", userId);
+            int savingsCounter = 1; // Counter for Savings labels (Savings 1, Savings 2, etc.)
+            while ((line = reader.readLine()) != null) {
+                String[] fields = line.split(",");
+                if (fields.length < 4) {
+                    System.out.println("Skipping invalid line in savings file: " + line);
+                    continue;
+                }
+                double percentage = Double.parseDouble(fields[3]);
+                String savingsLabel = "Savings " + savingsCounter; // Label for each savings record
+                dataset.addValue(percentage, "Savings", savingsLabel);
+                savingsCounter++; // Increment the savings label counter
+            }
         }
-
-        reader.close();
         return dataset;
     }
 
-    // Method to read loan data
-    private static DefaultPieDataset readLoanData(String filePath) throws IOException {
-        DefaultPieDataset dataset = new DefaultPieDataset();
-        BufferedReader reader = new BufferedReader(new FileReader(filePath));
-        String line;
-        reader.readLine(); // Skip header
-
-        Map<String, Integer> loanStatusCount = new HashMap<>();
-
-        while ((line = reader.readLine()) != null) {
-            String[] fields = line.split(",");
-            String status = fields[6];
-            loanStatusCount.put(status, loanStatusCount.getOrDefault(status, 0) + 1);
-        }
-
-        for (Map.Entry<String, Integer> entry : loanStatusCount.entrySet()) {
-            dataset.setValue(entry.getKey(), entry.getValue());
-        }
-
-        reader.close();
-        return dataset;
-    }
-
-    // Method to read transaction data
-    private static DefaultCategoryDataset readTransactionData(String filePath) throws IOException {
+    // Method to read loan repayment data (remaining loan amount over time)
+    private static DefaultCategoryDataset readLoanRepaymentData(String filePath) throws IOException {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        BufferedReader reader = new BufferedReader(new FileReader(filePath));
-        String line;
-        reader.readLine(); // Skip header
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Assuming date format is YYYY-MM-DD
+        TreeMap<Date, Double> loanRepaymentMap = new TreeMap<>(); // TreeMap for chronological order
 
-        while ((line = reader.readLine()) != null) {
-            String[] fields = line.split(",");
-            String date = fields[0];
-            double balance = Double.parseDouble(fields[4]);
-            dataset.addValue(balance, "Balance", date);
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            reader.readLine(); // Skip the header
+
+            while ((line = reader.readLine()) != null) {
+                String[] fields = line.split(",");
+                if (fields.length < 8) {  // Ensure we have at least 8 columns
+                    System.out.println("Skipping invalid line in loans file (not enough columns): " + line);
+                    continue;
+                }
+                String loanStartDate = fields[7]; // Assuming loan start date is in column 8 (0-based index 7)
+                double remainingAmount = 0;
+
+                try {
+                    remainingAmount = Double.parseDouble(fields[4]); // Assuming remaining amount is in column 5 (0-based index 4)
+                } catch (NumberFormatException e) {
+                    System.out.println("Skipping invalid remaining amount in line: " + line);
+                    continue;
+                }
+
+                // Try to parse the date
+                try {
+                    Date startDate = sdf.parse(loanStartDate);
+                    loanRepaymentMap.put(startDate, remainingAmount);
+                } catch (ParseException e) {
+                    System.out.println("Skipping line with unparseable date: " + line);
+                    continue;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error processing loan repayment data: " + e.getMessage());
         }
 
-        reader.close();
+        // Add loan repayment data to the dataset (Date vs Remaining Amount)
+        for (Map.Entry<Date, Double> entry : loanRepaymentMap.entrySet()) {
+            // Format the date for display
+            String formattedDate = sdf.format(entry.getKey());
+            dataset.addValue(entry.getValue(), "Remaining Amount", formattedDate);
+        }
+
+        return dataset;
+    }
+
+    // Method to read transaction data and calculate debit and credit totals
+    private static DefaultPieDataset readTransactionData(String filePath) throws IOException {
+        DefaultPieDataset dataset = new DefaultPieDataset();
+        double totalDebit = 0.0;
+        double totalCredit = 0.0;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            reader.readLine(); // Skip the header
+
+            while ((line = reader.readLine()) != null) {
+                String[] fields = line.split(",");
+                if (fields.length < 5) {
+                    System.out.println("Skipping invalid line in transactions file: " + line);
+                    continue;
+                }
+                double debit = Double.parseDouble(fields[2]);
+                double credit = Double.parseDouble(fields[3]);
+
+                totalDebit += debit;
+                totalCredit += credit;
+            }
+        }
+
+        // Calculate the total amount for both debit and credit
+        double total = totalDebit + totalCredit;
+
+        // Add debit and credit amounts to the dataset with percentage calculations
+        dataset.setValue("Debit (" + String.format("%.2f", (totalDebit / total) * 100) + "%)", totalDebit);
+        dataset.setValue("Credit (" + String.format("%.2f", (totalCredit / total) * 100) + "%)", totalCredit);
+
+        return dataset;
+    }
+
+    // Method to read transaction data and calculate total credit per day
+    private static DefaultCategoryDataset readDailyCreditData(String filePath) throws IOException {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        Map<String, Double> dailyCredit = new HashMap<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            reader.readLine(); // Skip the header
+
+            while ((line = reader.readLine()) != null) {
+                String[] fields = line.split(",");
+                if (fields.length < 5) {
+                    System.out.println("Skipping invalid line in transactions file: " + line);
+                    continue;
+                }
+                String date = fields[0];
+                double credit = Double.parseDouble(fields[3]);
+
+                // Add credit to the corresponding date
+                dailyCredit.put(date, dailyCredit.getOrDefault(date, 0.0) + credit);
+            }
+        }
+
+        // Add each date and total credit to the dataset
+        for (Map.Entry<String, Double> entry : dailyCredit.entrySet()) {
+            dataset.addValue(entry.getValue(), "Credit", entry.getKey());
+        }
         return dataset;
     }
 
     // Method to create a bar chart
     private static void createBarChart(String title, String categoryAxisLabel, String valueAxisLabel, DefaultCategoryDataset dataset) {
+    // Create the bar chart
         JFreeChart barChart = ChartFactory.createBarChart(
                 title,
                 categoryAxisLabel,
@@ -107,8 +199,14 @@ public class DataVisualization {
                 PlotOrientation.VERTICAL,
                 true, true, false);
 
+        // Customize the bar chart's appearance
+        // Set the color of the bars
+        barChart.getCategoryPlot().getRenderer().setSeriesPaint(0, new java.awt.Color(0, 102, 204));  // A clear blue color
+    
+        // Display the chart
         displayChart(barChart);
     }
+
 
     // Method to create a pie chart
     private static void createPieChart(String title, DefaultPieDataset dataset) {
@@ -118,19 +216,6 @@ public class DataVisualization {
                 true, true, false);
 
         displayChart(pieChart);
-    }
-
-    // Method to create a line chart
-    private static void createLineChart(String title, String categoryAxisLabel, String valueAxisLabel, DefaultCategoryDataset dataset) {
-        JFreeChart lineChart = ChartFactory.createLineChart(
-                title,
-                categoryAxisLabel,
-                valueAxisLabel,
-                dataset,
-                PlotOrientation.VERTICAL,
-                true, true, false);
-
-        displayChart(lineChart);
     }
 
     // Method to display a chart
@@ -144,3 +229,8 @@ public class DataVisualization {
         frame.setVisible(true);
     }
 }
+
+
+
+
+

@@ -8,6 +8,7 @@ import src.Transaction.Transaction;
 import src.Savings.savings.SavingsSettings;
 import src.TransactionHistory;
 import src.CreditLoan.CreditLoan.CreditLoan;
+import Visualize.DataVisualization; // Import the DataVisualization class
 
 public class Main {
     public static void main(String[] args) {
@@ -37,7 +38,8 @@ public class Main {
             System.out.println("4. Savings");
             System.out.println("5. Credit Loan");
             System.out.println("6. Deposit Interest Predictor");
-            System.out.println("7. Logout");
+            System.out.println("7. Visualize Data"); // Added option for data visualization
+            System.out.println("8. Logout");
 
             System.out.print("\n> ");
             key = k.next();
@@ -68,7 +70,7 @@ public class Main {
                     break;
 
                 case "3":
-                transactionHistory.viewTransactionHistory(k); 
+                    transactionHistory.viewTransactionHistory(k); 
                     break;
 
                 case "4":
@@ -90,7 +92,12 @@ public class Main {
                     DepositInterestPredictor.main(new String[]{}); // Call the Deposit Interest Predictor
                     break;
 
-                case "7":
+                case "7": // New case for data visualization
+                    System.out.println("\n== Data Visualization ==");
+                    visualizeData();
+                    break;
+
+                case "8":
                     System.out.println("\nThank you for using \"Ledger System AlgoNauts\".");
                     loop = false;
                     break;
@@ -155,7 +162,23 @@ public class Main {
             System.out.println("Loan: 0.00");
         }
     }
+
+    // Integrate Data Visualization
+    public static void visualizeData() {
+        try {
+            // Paths to your CSV files
+            String savingsPath = "savings.csv";
+            String loansPath = "loans.csv";
+            String transactionsPath = "transaction.csv";
+
+            // Call DataVisualization methods
+            DataVisualization.main(new String[]{savingsPath, loansPath, transactionsPath});
+        } catch (Exception e) {
+            System.out.println("Error visualizing data: " + e.getMessage());
+        }
+    }
 }
+
 
 
 
