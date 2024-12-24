@@ -9,10 +9,13 @@ public class SavingsSettings {
     private int savingsPercentage = 0;        // Default savings percentage
     private double totalSavings = 0.0;        // Accumulated savings amount
     private TransactionHistory transactionHistory; // Links to TransactionHistory for balance updates
-
+    private List<SavingsRecord> savingsRecords; //List to store savings records
+    
     // Constructor to link TransactionHistory
     public SavingsSettings(TransactionHistory transactionHistory) {
         this.transactionHistory = transactionHistory;
+        this.savingsRecords = new ArrayList<>(); // Initialize the list to store savings records.
+        loadPreviousSavingsRecords(); // Load previous savings records (NEW)
     }
 
     // Flow to activate and set up savings
@@ -92,6 +95,17 @@ public class SavingsSettings {
     // Getter for active status
     public boolean isSavingsActive() {
         return isSavingsActive;
+    }
+
+    // Load previous savings records (NEW)
+    private void loadPreviousSavingsRecords() {
+        SavingsCSV savingsCSV = new SavingsCSV();
+        this.savingsRecords = savingsCSV.loadSavingsRecords(); // Load previous records from CSV
+        if (!savingsRecords.isEmpty()) {
+            SavingsRecord latestRecord = savingsRecords.get(savingsRecords.size() - 1);
+            this.isSavingsActive = latestRecord.getStatus().equals("Active");
+            this.savingsPercentage = latestRecord.getPercentage();
+        }
     }
 }
 
