@@ -9,6 +9,7 @@ public class SavingsCSV {
 
     // private static final String filePath = "savings.csv"
     private static final String filePath = System.getProperty("user.home") + "/Desktop/Ledger/savings.csv";
+    private static final File Savings_FILE = new File(filePath);
 
     private List<SavingsRecord> savingsRecords;
 
