@@ -6,12 +6,15 @@ import java.util.List;
 
 public class TransactionCSV {
 
-    private static final String filePath = "C:\\Users\\tzeha\\Desktop\\LedgerSystem\\data\\transaction.csv";
+    // Dynamically create file path based on the username
+    public static String getFilePath(String username) {
+        return "C:\\Users\\tzeha\\Desktop\\LedgerSystem\\data\\transactions_" + username + ".csv";
+    }
 
-    public static void exportTransactions(List<Transaction> transactions) {
+    public static void exportTransactions(List<Transaction> transactions, String username) {
         double runningBalance = 0.0;  // Track balance dynamically as we write transactions
 
-        try (FileWriter writer = new FileWriter(filePath)) {
+        try (FileWriter writer = new FileWriter(getFilePath(username))) {
             // Write the header
             writer.write("Date,Description,Debit,Credit,Balance\n");
 
@@ -22,9 +25,9 @@ public class TransactionCSV {
 
                 // Update the running balance based on the transaction type
                 if (t.getType() == Transaction.TransactionType.DEBIT) {
-                    runningBalance += t.getAmount();  
+                    runningBalance -= t.getAmount();  // Decrease balance for debit
                 } else if (t.getType() == Transaction.TransactionType.CREDIT) {
-                    runningBalance -= t.getAmount();  
+                    runningBalance += t.getAmount();  // Increase balance for credit
                 }
 
                 // Prepare debit and credit columns
@@ -49,6 +52,9 @@ public class TransactionCSV {
             System.out.println("Error exporting transactions: " + e.getMessage());
         }
     }
+
+    
 }
+
 
 

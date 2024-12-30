@@ -1,108 +1,98 @@
 package src.Savings.savings;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.List;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class SavingsCSV {
 
-    // private static final String filePath = "savings.csv"
-    private static final String filePath = System.getProperty("user.home") + "/Desktop/Ledger/savings.csv";
+    private File savingsFile; // Reference to the savings file
 
-    private List<SavingsRecord> savingsRecords;
+    public SavingsCSV(String username) {
+        // Initialize the file name based on the username
+        this.savingsFile = new File("savings_" + username + ".csv");
 
-    public SavingsCSV() {
-        savingsRecords = new ArrayList<>();
-        loadSavingsRecords(); // Load previous records when the object is created  (NEW)
-    
-    }
-
-    public void addSavingsRecord(SavingsRecord record) {
-        savingsRecords.add(record);
-    }
-
-    public void exportSavings() {
-        try (FileWriter writer = new FileWriter(filePath)) {
-            writer.write("Savings_id,User_id,Status,Percentage\n");
-
-            for (SavingsRecord record : savingsRecords) {
-                String recordLine = String.format("%d,%d,%s,%d\n", 
-                        record.getSavingsId(), 
-                        record.getUserId(),
-                        record.getStatus(),
-                        record.getPercentage());
-                writer.write(recordLine);
-            }
-
-            System.out.println("Savings data exported successfully!");
-
-        } catch (IOException e) {
-            System.out.println("Error exporting savings: " + e.getMessage());
+        // Ensure the file exists with a proper header
+        if (!savingsFile.exists()) {
+            initializeSavingsFile();
+        } else {
+            ensureHeaderExists();
         }
     }
-    // Load previous savings records from the CSV file (NEW)
-    public List<SavingsRecord> loadSavingsRecords() {
-        List<SavingsRecord> loadedRecords = new ArrayList<>();
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            boolean isFirstLine = true; // Skip the header line
+    // Initialize the savings file with a header
+    private void initializeSavingsFile() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(savingsFile))) {
+            writer.write("Savings_id,Username,Status,Percentage,Total_Savings\n");
+        } catch (IOException e) {
+            System.out.println("Error initializing savings file: " + e.getMessage());
+        }
+    }
 
-            while ((line = reader.readLine()) != null) {
-                if (isFirstLine) {
-                    isFirstLine = false;
-                    continue; // Skip the header
-                }
-
-                String[] parts = line.split(",");
-                if (parts.length == 4) {
-                    int savingsId = Integer.parseInt(parts[0]);
-                    int userId = Integer.parseInt(parts[1]);
-                    String status = parts[2];
-                    int percentage = Integer.parseInt(parts[3]);
-
-                    loadedRecords.add(new SavingsRecord(savingsId, userId, status, percentage));
-                }
+    // Ensure the header exists in the file
+    private void ensureHeaderExists() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(savingsFile))) {
+            String firstLine = reader.readLine();
+            if (firstLine == null || !firstLine.equals("Savings_id,Username,Status,Percentage,Total_Savings")) {
+                initializeSavingsFile(); // Rewrite the header if missing or incorrect
             }
+        } catch (IOException e) {
+            System.out.println("Error ensuring header in savings file: " + e.getMessage());
+        }
+    }
 
-            System.out.println("Previous savings records loaded successfully!");
+    // Add a new savings record and write it to the file
+    public void addSavingsRecord(String username, String status, int percentage, double totalSavings) {
+        int nextId = getNextSavingsId();
 
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(savingsFile, true))) { // Append mode
+            writer.write(String.format("%d,%s,%s,%d,%.2f%n", nextId, username, status, percentage, totalSavings));
+            System.out.println("New savings record added successfully!");
+        } catch (IOException e) {
+            System.out.println("Error adding new savings record: " + e.getMessage());
+        }
+    }
+
+    // Load all savings records from the CSV file
+    public List<SavingsRecord> loadSavingsRecords() {
+        List<SavingsRecord> records = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(savingsFile))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("Savings_id")) continue; // Skip the header
+
+                String[] fields = line.split(",");
+                int savingsId = Integer.parseInt(fields[0]);
+                String username = fields[1];
+                String status = fields[2];
+                int percentage = Integer.parseInt(fields[3]);
+                double totalSavings = Double.parseDouble(fields[4]);
+
+                records.add(new SavingsRecord(savingsId, username, status, percentage, totalSavings));
+            }
         } catch (IOException e) {
             System.out.println("Error loading savings records: " + e.getMessage());
         }
+        return records;
+    }
 
-        return loadedRecords;
+    // Get the next Savings_id for a new record
+    private int getNextSavingsId() {
+        int nextId = 1;
+        try (BufferedReader reader = new BufferedReader(new FileReader(savingsFile))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("Savings_id")) continue; // Skip the header
+
+                String[] fields = line.split(",");
+                int currentId = Integer.parseInt(fields[0]);
+                nextId = Math.max(nextId, currentId + 1); // Increment the highest ID
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading file for next Savings_id: " + e.getMessage());
+        }
+        return nextId;
     }
 }
 
-class SavingsRecord {
-    private int savingsId;
-    private int userId;
-    private String status;
-    private int percentage;
-
-    public SavingsRecord(int savingsId, int userId, String status, int percentage) {
-        this.savingsId = savingsId;
-        this.userId = userId;
-        this.status = status;
-        this.percentage = percentage;
-    }
-
-    public int getSavingsId() {
-        return savingsId;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public int getPercentage() {
-        return percentage;
-    }
-}
 

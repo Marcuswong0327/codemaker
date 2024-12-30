@@ -1,21 +1,25 @@
 package src.Transaction;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Scanner;
-import src.Savings.savings.SavingsSettings;  // Import the SavingsSettings class from the savings package
+
+import src.Savings.savings.SavingsCSV;
+import src.Savings.savings.SavingsRecord;
+import src.Savings.savings.SavingsSettings; // Import the SavingsSettings class from the savings package
 
 public class Debit {
 
     private double debit;
     private String description;
     private Scanner scanner = new Scanner(System.in);
-    private SavingsSettings savingsSettings;  // Link to SavingsSettings
+    private SavingsSettings savingsSettings; // Link to SavingsSettings
 
     // Default constructor
     public Debit() {
         this.debit = 0;
         this.description = "";
-        this.savingsSettings = null;  // No savingsSettings object yet
+        this.savingsSettings = null; // No savingsSettings object yet
     }
 
     // Constructor to link the SavingsSettings object
@@ -41,9 +45,8 @@ public class Debit {
         this.description = description;
     }
 
-    // Method to record a debit transaction
     public Transaction recordDebit() {
-        // Check if savingsSettings is initialized
+        // Check if savings feature is active
         if (savingsSettings != null && savingsSettings.getSavingsPercentage() > 0) {
             System.out.println("Savings feature is active.");
         } else {
@@ -65,22 +68,35 @@ public class Debit {
 
         double remainingDebit = debit;
 
-        // If savings is active, calculate savings deduction
+        // Apply savings deduction only for debits
         if (savingsSettings != null && savingsSettings.getSavingsPercentage() > 0) {
             double savingsDeduction = (debit * savingsSettings.getSavingsPercentage()) / 100;
-            remainingDebit = debit - savingsDeduction;
+            remainingDebit -= savingsDeduction;
 
-            if (remainingDebit < 0) {
-                System.out.println("Insufficient balance for this transaction after savings deduction.");
-                return null;
-            }
+            // Update the savings balance
+            savingsSettings.addToSavingsBalance(savingsDeduction);
 
             System.out.printf("Savings Deducted: %.2f%n", savingsDeduction);
+
+            // Now, update the savings record in the CSV file
+            String username = savingsSettings.getUsername(); // Get the username from savingsSettings
+            SavingsCSV savingsCSV = new SavingsCSV(username); // Pass the username to the constructor
+            List<SavingsRecord> updatedRecords = savingsCSV.loadSavingsRecords();
+
+            // Iterate through records and update the one that matches the savings ID
+            for (SavingsRecord record : updatedRecords) {
+                if (record.getSavingsId() == savingsSettings.getSavingsId()) { // Match the savings ID
+                    record.setTotalSavings(savingsSettings.getTotalSavings()); // Update total savings
+                    record.setPercentage(savingsSettings.getSavingsPercentage()); // Update percentage
+                }
+            }
+
+            // Write the updated records back to the CSV
+            savingsCSV.addSavingsRecord(username, "Active", savingsSettings.getSavingsPercentage(), savingsSettings.getTotalSavings()); // Pass the list of updated records
         }
 
-        // Record the debit transaction with the adjusted remaining balance
+        // Record the debit transaction
         return new Transaction(LocalDate.now(), description, remainingDebit, Transaction.TransactionType.DEBIT);
     }
+
 }
-
-

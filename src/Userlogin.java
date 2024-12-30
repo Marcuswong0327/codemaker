@@ -1,4 +1,4 @@
-package mainapp;
+package src;
 
 import org.mindrot.jbcrypt.BCrypt; // BCrypt for hashing
 import java.io.File;
@@ -9,7 +9,7 @@ import java.io.Writer;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-public class MainApp {
+public class Userlogin {
     private static final String UserInfo = System.getProperty("user.home") + "/Desktop/Ledger/UserInfo.csv";
     private static final File USER_FILE = new File(UserInfo);
     private static Writer writer;

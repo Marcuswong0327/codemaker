@@ -1,6 +1,7 @@
 package src.Transaction;
 
 import java.time.LocalDate;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Credit {
@@ -32,21 +33,41 @@ public class Credit {
 
     // Method to record a credit transaction
     public Transaction recordCredit() {
-        System.out.print("Enter credit amount: ");
-        credit = scanner.nextDouble();
-        if (credit <= 0) {
-            System.out.println("Credit amount must be positive!");
-            return null;
+        double creditAmount;
+        String transactionDescription;
+
+        // Get credit amount with validation
+        while (true) {
+            System.out.print("Enter credit amount: ");
+            try {
+                creditAmount = scanner.nextDouble();
+                if (creditAmount <= 0) {
+                    System.out.println("Credit amount must be positive. Please try again.");
+                } else {
+                    break;
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input! Please enter a numeric value.");
+                scanner.nextLine(); // Clear invalid input
+            }
         }
 
-        System.out.print("Enter description: ");
+        // Get transaction description
         scanner.nextLine(); // Clear buffer
-        description = scanner.nextLine();
+        while (true) {
+            System.out.print("Enter description: ");
+            transactionDescription = scanner.nextLine().trim();
+            if (transactionDescription.isEmpty()) {
+                System.out.println("Description cannot be empty. Please try again.");
+            } else {
+                break;
+            }
+        }
 
-        return new Transaction(LocalDate.now(), description, credit, Transaction.TransactionType.CREDIT);
+        // Create and return the transaction
+        System.out.println("Credit recorded successfully!");
+        return new Transaction(LocalDate.now(), transactionDescription, creditAmount,
+                Transaction.TransactionType.CREDIT);
     }
+
 }
-
-
-
-
