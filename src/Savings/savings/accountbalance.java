@@ -54,7 +54,7 @@ public class accountbalance {
         displayCurrentBalance();
     }
     public void exportBalanceToCSV(String userId) {
-        String filePath = "Accountbalance.csv"; // Adjust the file path as needed
+        String filePath = "Accountbalance.csv"; 
 
         try (FileWriter writer = new FileWriter(filePath)) {
             // Write header
