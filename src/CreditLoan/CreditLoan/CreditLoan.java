@@ -1,8 +1,15 @@
 package src.CreditLoan.CreditLoan;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import javax.swing.JOptionPane;
@@ -20,7 +27,9 @@ public class CreditLoan {
     private String username;
     private static final DecimalFormat df = new DecimalFormat("0.00");
 
-    // Constructor accepting loanAmount, interestRate, months, and username
+    private double remainingAmount; // The amount left to repay
+
+    // Constructor update to initialize remainingAmount
     public CreditLoan(double loanAmount, double interestRate, int months, String username) {
         this.loanAmount = loanAmount;
         this.interestRate = interestRate;
@@ -28,10 +37,27 @@ public class CreditLoan {
         this.username = username;
         this.amountPaid = 0;
         this.isLoanPaid = false;
+        this.remainingAmount = loanAmount; // Initialize remainingAmount
         this.monthlyPayment = calculateMonthlyPayment();
         this.totalRepayment = monthlyPayment * months;
         this.loanStartDate = LocalDate.now(); // Default to current date
         this.nextPaymentDate = loanStartDate.plusDays(5); // Next payment is in 5 days
+    }
+
+    // Constructor for loaded existing loan (after repayments)
+    public CreditLoan(double loanAmount, double interestRate, int months, String username, double remainingAmount,
+            double amountPaid) {
+        this.loanAmount = loanAmount;
+        this.interestRate = interestRate;
+        this.months = months;
+        this.username = username;
+        this.amountPaid = amountPaid;
+        this.remainingAmount = remainingAmount;
+        this.isLoanPaid = remainingAmount <= 0;
+        this.monthlyPayment = calculateMonthlyPayment();
+        this.totalRepayment = monthlyPayment * months;
+        this.loanStartDate = LocalDate.now(); // Default to current date or load from file
+        this.nextPaymentDate = loanStartDate.plusDays(5); // Next payment is in 5 days (or load from file)
     }
 
     // Calculate monthly payment using loan amortization formula
@@ -40,7 +66,6 @@ public class CreditLoan {
         return loanAmount * rate / (1 - Math.pow(1 + rate, -months)); // Loan amortization formula
     }
 
-    // Apply for a loan (display loan details)
     public void loan() {
         System.out.println("\n--- Loan Details ---");
         System.out.println("Loan Amount: " + df.format(loanAmount));
@@ -51,10 +76,13 @@ public class CreditLoan {
         System.out.println("----------------------\n");
 
         // Create a LoansRecord for the new loan application
-        LoansRecord loanRecord = new LoansRecord(1, "user1", loanAmount, interestRate, months,
-                totalRepayment - amountPaid, isLoanPaid ? "Paid" : "Active", LocalDate.now().toString());
+        LoansRecord loanRecord = new LoansRecord(1, getUsername(), loanAmount, interestRate, months,
+                totalRepayment - amountPaid, isLoanPaid ? "Paid" : "Active", LocalDate.now().toString(), amountPaid); // Ensure
+                                                                                                                      // amountPaid
+                                                                                                                      // is
+                                                                                                                      // included
 
-        // Export the loan to CSV
+        // Export the loan to CSV (make sure the file path uses username)
         LoansCSV.exportLoans(loanRecord, getUsername()); // Update loan information in CSV
     }
 
@@ -65,6 +93,7 @@ public class CreditLoan {
                     JOptionPane.INFORMATION_MESSAGE);
             return;
         }
+
         amountPaid += paymentAmount;
         if (amountPaid >= totalRepayment) {
             isLoanPaid = true;
@@ -81,11 +110,50 @@ public class CreditLoan {
         nextPaymentDate = nextPaymentDate.plusMonths(1);
 
         // Create an updated LoansRecord for the repaid loan
-        LoansRecord loanRecord = new LoansRecord(1, "user1", loanAmount, interestRate, months,
-                totalRepayment - amountPaid, isLoanPaid ? "Paid" : "Active", LocalDate.now().toString());
+        LoansRecord loanRecord = new LoansRecord(
+                getLoanId(),
+                getUsername(),
+                loanAmount,
+                interestRate,
+                months,
+                totalRepayment - amountPaid, // Remaining amount should be the updated value
+                isLoanPaid ? "Paid" : "Active",
+                LocalDate.now().toString(),
+                amountPaid // Make sure amountPaid is updated
+        );
 
-        // Export the updated loan status to CSV
-        LoansCSV.exportLoans(loanRecord, getUsername()); // Update loan information in CSV
+        // Update the loan record in the CSV file
+        updateLoanCSV(loanRecord, getUsername());
+    }
+
+    
+    // Update the loan record in CSV
+    public void updateLoanCSV(LoansRecord loanRecord, String username) {
+        String loanFilePath = "loans_" + username + ".csv";
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(loanFilePath, true))) {
+            // Format loan amount and remaining amount to two decimal places
+            String formattedLoanAmount = df.format(loanRecord.getLoanAmount());
+            String formattedRemainingAmount = df.format(loanRecord.getRemainingAmount());
+    
+            // Construct the CSV line
+            String loanData = String.join(",",
+                    String.valueOf(loanRecord.getLoanId()),
+                    loanRecord.getUsername(),
+                    formattedLoanAmount,
+                    String.valueOf(loanRecord.getInterestRate()),
+                    String.valueOf(loanRecord.getMonths()),
+                    formattedRemainingAmount,
+                    loanRecord.getStatus(),
+                    loanRecord.getLoanStartDate(),
+                    df.format(loanRecord.getAmountPaid())
+            );
+    
+            // Write the line to the CSV file
+            writer.write(loanData);
+            writer.newLine();
+        } catch (IOException e) {
+            System.out.println("Error writing loan data to file: " + e.getMessage());
+        }
     }
 
     // Check if the loan is fully paid
@@ -93,7 +161,6 @@ public class CreditLoan {
         return isLoanPaid;
     }
 
-    // Display loan details
     public void displayLoanDetails() {
         if (isLoanPaid) {
             System.out.println("\n--- Loan Paid Off ---");
@@ -106,8 +173,8 @@ public class CreditLoan {
         System.out.println("Loan Period: " + months + " months");
         System.out.println("Monthly Payment: " + df.format(monthlyPayment));
         System.out.println("Total Repayment: " + df.format(totalRepayment));
-        System.out.println("Amount Paid: " + df.format(amountPaid));
-        System.out.println("Remaining Balance: " + df.format(totalRepayment - amountPaid));
+        System.out.println("Amount Paid: " + df.format(amountPaid)); // Show the updated amount paid
+        System.out.println("Remaining Balance: " + df.format(totalRepayment - amountPaid)); // Show remaining balance
         System.out.println("----------------------\n");
     }
 
@@ -154,9 +221,9 @@ public class CreditLoan {
     }
 
     public int getLoanId() {
-        return (String.valueOf(loanAmount) + username).hashCode(); // Convert loanAmount to String and combine with username
+        return (String.valueOf(loanAmount) + username).hashCode(); // Convert loanAmount to String and combine with
+                                                                   // username
     }
-    
 
     // Getter for months (loan period)
     public int getMonths() {
@@ -172,6 +239,21 @@ public class CreditLoan {
     public LocalDate getLoanStartDate() {
         return loanStartDate;
     }
-    
+
+    public double getAmountPaid() {
+        return this.amountPaid; // Return the current amount paid
+    }
+
+    public void setRemainingAmount(double remainingAmount2) {
+        this.remainingAmount = remainingAmount2;
+    }
+
+    public void setAmountPaid(double amountPaid2) {
+        this.amountPaid = amountPaid2;
+    }
+
+    public void setIsLoanPaid(boolean isLoanPaid2) {
+        this.isLoanPaid = isLoanPaid2;
+    }
 
 }

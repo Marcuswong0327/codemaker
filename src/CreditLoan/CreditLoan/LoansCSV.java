@@ -1,6 +1,7 @@
 package src.CreditLoan.CreditLoan;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -17,19 +18,21 @@ public class LoansCSV {
             // If the file is new, write the header
             boolean isNewFile = new java.io.File(filePath).length() == 0;
             if (isNewFile) {
-                writer.write("LoanId,UserId,LoanAmount,InterestRate,Months,RemainingAmount,Status,LoanStartDate\n");
+                writer.write("LoanId,Username,LoanAmount,InterestRate,Months,RemainingAmount,Status,LoanStartDate,AmountPaid\n");
             }
     
-            // Append the new loan record
-            String recordLine = String.format("%d,%s,%.2f,%.2f,%d,%.2f,%s,%s\n",
+            // Append the new loan record including the amountPaid field
+            String recordLine = String.format("%d,%s,%.2f,%.2f,%d,%.2f,%s,%s,%.2f\n",
                     loanRecord.getLoanId(),
-                    loanRecord.getUserId(),
+                    loanRecord.getUsername(),
                     loanRecord.getLoanAmount(),
                     loanRecord.getInterestRate(),
                     loanRecord.getMonths(),
                     loanRecord.getRemainingAmount(),
                     loanRecord.getStatus(),
-                    loanRecord.getLoanStartDate());
+                    loanRecord.getLoanStartDate(),
+                    loanRecord.getAmountPaid());  // Include amountPaid
+    
             writer.write(recordLine);
     
             System.out.println("Loan record added successfully to " + filePath);
@@ -38,36 +41,58 @@ public class LoansCSV {
             System.out.println("Error exporting loans: " + e.getMessage());
         }
     }
+    
 
     public static List<LoansRecord> loadLoans(String username) {
-        String filePath = "loans_" + username + ".csv";
         List<LoansRecord> loanRecords = new ArrayList<>();
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+        String filePath = "loans_" + username + ".csv"; // Assuming each user has a separate loan file
+    
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
-            while ((line = reader.readLine()) != null) {
-                String[] data = line.split(",");
-                int loanId = Integer.parseInt(data[0]);
-                String userId = data[1];
-                double loanAmount = Double.parseDouble(data[2]);
-                double interestRate = Double.parseDouble(data[3]);
-                int months = Integer.parseInt(data[4]);
-                double remainingAmount = Double.parseDouble(data[5]);
-                String status = data[6];
-                String loanStartDate = data[7];
-
-                LoansRecord record = new LoansRecord(loanId, userId, loanAmount, interestRate, months, remainingAmount,
-                        status, loanStartDate);
-                loanRecords.add(record);
+            br.readLine(); // Skip header if necessary
+    
+            while ((line = br.readLine()) != null) {
+                String[] loanDetails = line.split(",");
+                if (loanDetails.length >= 8) { // Adjusted for the additional amountPaid field
+                    LoansRecord record = new LoansRecord(
+                        Integer.parseInt(loanDetails[0]), // Loan ID
+                        loanDetails[1], // Username
+                        Double.parseDouble(loanDetails[2]), // Loan amount
+                        Double.parseDouble(loanDetails[3]), // Interest rate
+                        Integer.parseInt(loanDetails[4]), // Repayment period
+                        Double.parseDouble(loanDetails[5]), // Remaining loan amount
+                        loanDetails[6], // Status
+                        loanDetails[7], // Date
+                        Double.parseDouble(loanDetails[8]) // Amount paid
+                    );
+                    loanRecords.add(record);
+                }
             }
-
         } catch (IOException e) {
-            System.out.println("Error loading loans: " + e.getMessage());
+            e.printStackTrace();
         }
-
+    
         return loanRecords;
     }
     
+    public static void appendRepaymentRecord(LoansRecord loanRecord, String username) {
+        String filePath = "loans_" + username + ".csv";
+    
+        try (FileWriter writer = new FileWriter(filePath, true)) { // Append mode
+            String recordLine = String.format("%d,%s,%.2f,%.2f,%d,%.2f,%s,%s,%.2f\n",
+                    loanRecord.getLoanId(),
+                    loanRecord.getUsername(),
+                    loanRecord.getLoanAmount(),
+                    loanRecord.getInterestRate(),
+                    loanRecord.getMonths(),
+                    loanRecord.getRemainingAmount(),
+                    loanRecord.getStatus(),
+                    loanRecord.getLoanStartDate(),
+                    loanRecord.getAmountPaid());
+            writer.write(recordLine);
+        } catch (IOException e) {
+            System.out.println("Error appending repayment record: " + e.getMessage());
+        }
+    }
+    
 }
-
-

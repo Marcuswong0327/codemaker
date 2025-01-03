@@ -38,18 +38,23 @@ public class CreditLoanMain {
         scanner.close();
     }
 
-    // Apply for a new loan
     public static void applyForLoan(Scanner scanner) {
-        // Check if the user already has an active loan
-        if (userLoan != null && !userLoan.isLoanPaid()) {
-            System.out.println("You already have an active loan. Repay your loan before applying for a new one.");
-            return;
-        }
-
         // Collect user input
         System.out.print("Enter your username: ");
         String username = scanner.next(); // Getting the username
 
+        // Load existing loans for the user from CSV
+        List<LoansRecord> loanRecords = LoansCSV.loadLoans(username);
+
+        // Check if there is any active loan
+        for (LoansRecord record : loanRecords) {
+            if (record.getStatus().equalsIgnoreCase("Active")) {
+                System.out.println("You already have an active loan. Repay your loan before applying for a new one.");
+                return; // Exit the method if an active loan exists
+            }
+        }
+
+        // If no active loans, proceed with loan application
         System.out.print("Enter loan amount: ");
         double loanAmount = scanner.nextDouble();
 
@@ -60,24 +65,30 @@ public class CreditLoanMain {
         int months = scanner.nextInt();
 
         // Create a new CreditLoan object
-        userLoan = new CreditLoan(loanAmount, interestRate, months, username); // Pass username here
+        userLoan = new CreditLoan(loanAmount, interestRate, months, username);
 
-        userLoan.loan(); // Call loan method instead of applyLoan
+        // Calculate the loan details (you may want to use a method like 'loan()' to
+        // calculate repayment)
+        userLoan.loan();
 
-        // Create a new loan record
+        // Create a new loan record with the initial amount paid as 0
         LoansRecord updatedLoanRecord = new LoansRecord(
-                1, // Loan ID (you might want to implement an auto-increment feature for unique
-                   // IDs)
-                username, // Use the username from input
+                loanRecords.size() + 1, // Loan ID (auto-increment based on the size of existing records)
+                username,
                 userLoan.getLoanAmount(),
                 userLoan.getInterestRate(),
                 userLoan.getRepaymentPeriod(),
                 userLoan.getRemainingLoanAmount(),
-                userLoan.isLoanPaid() ? "Paid" : "Active",
-                LocalDate.now().toString());
+                "Active", // The loan is now active
+                LocalDate.now().toString(),
+                0 // Initial amount paid is 0
+        );
 
         // Export the loan record to CSV
-        LoansCSV.exportLoans(updatedLoanRecord, username); // Export the updated loan record with the username
+        LoansCSV.exportLoans(updatedLoanRecord, username);
+
+        // Inform the user that the loan was successfully applied
+        System.out.println("Loan successfully applied!");
     }
 
     // Repay the loan
@@ -98,20 +109,21 @@ public class CreditLoanMain {
         // Process the loan repayment
         userLoan.repayLoan(paymentAmount);
 
-        // Create a new loan record with the updated details
-        LoansRecord newLoanRecord = new LoansRecord(
-                1, // Loan ID (this could be incremented to make it unique, for simplicity we use
-                   // '1')
-                userLoan.getUsername(), // Get the username from the userLoan object
+        // Create an updated LoansRecord with the new loan details
+        LoansRecord updatedLoanRecord = new LoansRecord(
+                userLoan.getLoanId(), // Use the correct loan ID from the userLoan object
+                userLoan.getUsername(),
                 userLoan.getLoanAmount(),
                 userLoan.getInterestRate(),
                 userLoan.getRepaymentPeriod(),
                 userLoan.getRemainingLoanAmount(),
                 userLoan.isLoanPaid() ? "Paid" : "Active",
-                LocalDate.now().toString());
+                LocalDate.now().toString(),
+                userLoan.getAmountPaid() // Include the updated amountPaid
+        );
 
         // Export the updated loan record to CSV
-        LoansCSV.exportLoans(newLoanRecord, userLoan.getUsername());
+        LoansCSV.exportLoans(updatedLoanRecord, userLoan.getUsername());
     }
 
     public static void viewLoanDetails() {
