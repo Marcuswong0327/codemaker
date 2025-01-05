@@ -100,7 +100,13 @@ public class Main {
         displayAccountSummary(transactionHistory, savingsSettings, creditLoan);
         displayLoanAmount(username);
 
+        String loanFilePath = "loans_" + username + ".csv";
+        // Load the most recent loan and display a repayment reminder
+        CreditLoan latestLoan = loadExistingLoan(loanFilePath);
+        latestLoan.displayRepaymentReminder();
+
         do {
+
             System.out.println("\n== Transaction Menu ==");
             System.out.println("1. Debit");
             System.out.println("2. Credit");
@@ -373,7 +379,7 @@ public class Main {
             CreditLoan loan) {
         System.out.println("\nBalance: " + String.format("%.2f", transactionHistory.getCurrentBalance()));
         System.out.println("Savings: " + String.format("%.2f", savings.getSavingsBalance()));
-
+        
         // if (loan != null) {
         // System.out.println("Loan: " + String.format("%.2f",
         // loan.getRemainingLoanAmount()));
@@ -418,6 +424,7 @@ public class Main {
             e.printStackTrace();
         }
     }
+
 
     // Integrate Data Visualization
     public static void visualizeData(String username) {
