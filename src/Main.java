@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
+import java.time.LocalDate; // Import LocalDate
 
 // Main system imports
 import src.Transaction.Credit;
@@ -33,6 +34,12 @@ public class Main {
     private static Writer writer;
     private static Scanner scan;
     private static String username;
+    private CreditLoan latestLoan;
+
+    public Main(String username) {
+        this.username = username;
+        loadLatestLoan();
+    }
 
     public static void main(String[] args) throws IOException {
         // Setup user authentication
@@ -97,13 +104,20 @@ public class Main {
         SavingsSettings savingsSettings = new SavingsSettings(transactionHistory, username);
 
         CreditLoan creditLoan = null;
+        transactionHistory.loadBalanceAndSavings();
         displayAccountSummary(transactionHistory, savingsSettings, creditLoan);
         displayLoanAmount(username);
 
         String loanFilePath = "loans_" + username + ".csv";
         // Load the most recent loan and display a repayment reminder
-        CreditLoan latestLoan = loadExistingLoan(loanFilePath);
-        latestLoan.displayRepaymentReminder();
+        CreditLoan latestLoan = CreditLoan.loadExistingLoan(loanFilePath);
+        Main main = new Main(username);
+        //main.loadLatestLoan();
+        if (latestLoan != null) {
+            latestLoan.displayRepaymentReminder();
+        } else {
+            //System.out.println("Loaded loan data: " + username);
+        }
 
         do {
 
@@ -171,6 +185,9 @@ public class Main {
                 case "7":
                     visualizeData(username);
                     break;
+
+                case "-1":
+                    savingsSettings.autoTransferSavingsToBalance();
 
                 case "8":
                     System.out.println("\nThank you for using \"Ledger System AlgoNauts\".");
@@ -288,19 +305,19 @@ public class Main {
 
     // In handleCreditLoanFlow
     public static CreditLoan handleCreditLoanFlow(Scanner scanner, String username) {
-        // Check if the user already has an existing loan
         String loanFilePath = "loans_" + username + ".csv";
         File loanFile = new File(loanFilePath);
 
-        // If the loan file exists and is not empty, load the existing loan
         if (loanFile.exists() && loanFile.length() > 0) {
-            // Load the existing loan data into the CreditLoan object
-            CreditLoan existingLoan = loadExistingLoan(loanFilePath);
-            System.out.println("You already have an existing loan. You can manage your loan below.");
-            return existingLoan; // Return the existing loan object
+            CreditLoan existingLoan = CreditLoan.loadExistingLoan(loanFilePath);
+            if (existingLoan != null) {
+                System.out.println("You already have an existing loan. You can manage your loan below.");
+                return existingLoan;
+            } else {
+                System.out.println("Error loading existing loan.");
+            }
         }
 
-        // If no existing loan, proceed with loan application
         System.out.println("You are applying for a new Credit Loan.");
         System.out.print("Enter loan amount: ");
         double loanAmount = scanner.nextDouble();
@@ -312,40 +329,68 @@ public class Main {
         CreditLoan newLoan = new CreditLoan(loanAmount, interestRate, months, username);
         newLoan.loan(); // Process the loan application
 
-        return newLoan; // Return the newly created loan
+        return newLoan;
     }
 
-    // Method to load loan and update its remaining amount
-    // Method to load the existing loan from the CSV file, ensuring it reads the
-    // most recent data
     public static CreditLoan loadExistingLoan(String loanFilePath) {
         try {
-            // Read all the lines from the CSV file
+            System.out.println("Reading loan file: " + loanFilePath);
             List<String> lines = Files.readAllLines(Paths.get(loanFilePath));
-
-            // Get the latest loan record (the last line in the file)
+            if (lines.size() <= 1) {
+                System.out.println("No loan data available.");
+                return null;
+            }
+    
             String lastLine = lines.get(lines.size() - 1);
             String[] fields = lastLine.split(",");
-
-            // Extract values from the last line
+    
+            if (fields.length < 9) {
+                System.out.println("Error: Expected 9 fields, but found " + fields.length);
+                return null;
+            }
+    
+            System.out.println("Parsed fields:");
+            for (int i = 0; i < fields.length; i++) {
+                System.out.println("Field " + i + ": " + fields[i]);
+            }
+    
             double loanAmount = Double.parseDouble(fields[2]);
             double interestRate = Double.parseDouble(fields[3]);
             int months = Integer.parseInt(fields[4]);
             double remainingAmount = Double.parseDouble(fields[5]);
-            boolean isLoanPaid = fields[6].equals("Paid");
+            boolean isLoanPaid = fields[6].equalsIgnoreCase("Paid");
             double amountPaid = Double.parseDouble(fields[8]);
             String username = fields[1];
-
-            // Create and return the CreditLoan object
+            // Adjust if needed to handle the absence of nextPaymentDate
+            LocalDate nextPaymentDate = LocalDate.now().plusMonths(1);
+    
             CreditLoan loan = new CreditLoan(loanAmount, interestRate, months, username);
             loan.setRemainingAmount(remainingAmount);
             loan.setAmountPaid(amountPaid);
             loan.setIsLoanPaid(isLoanPaid);
-
+            loan.setNextPaymentDate(nextPaymentDate);
+    
+            System.out.println("Loaded loan data successfully for user: " + username);
             return loan;
         } catch (IOException e) {
-            System.out.println("Error loading loan data: " + e.getMessage());
-            return null;
+            System.out.println("Error reading loan file: " + e.getMessage());
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.out.println("Error: Array index out of bounds: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Number format exception: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Unexpected error: " + e.getMessage());
+        }
+        return null;
+    }
+    
+    private void loadLatestLoan() {
+        String loanFilePath = "loans_" + username + ".csv";
+        latestLoan = CreditLoan.loadExistingLoan(loanFilePath);
+        if (latestLoan == null) {
+            //System.out.println("No loan data available.");
+        } else {
+            //System.out.println("Loaded loan data for user: " + latestLoan.getUsername());
         }
     }
 
@@ -379,7 +424,7 @@ public class Main {
             CreditLoan loan) {
         System.out.println("\nBalance: " + String.format("%.2f", transactionHistory.getCurrentBalance()));
         System.out.println("Savings: " + String.format("%.2f", savings.getSavingsBalance()));
-        
+
         // if (loan != null) {
         // System.out.println("Loan: " + String.format("%.2f",
         // loan.getRemainingLoanAmount()));
@@ -424,7 +469,6 @@ public class Main {
             e.printStackTrace();
         }
     }
-
 
     // Integrate Data Visualization
     public static void visualizeData(String username) {

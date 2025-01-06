@@ -8,7 +8,7 @@ public class TransactionCSV {
 
     // Dynamically create file path based on the username
     public static String getFilePath(String username) {
-        return "C:\\Users\\tzeha\\Desktop\\LedgerSystem\\data\\transactions_" + username + ".csv";
+        return "transactions_" + username + ".csv";
     }
 
     public static void exportTransactions(List<Transaction> transactions, String username) {

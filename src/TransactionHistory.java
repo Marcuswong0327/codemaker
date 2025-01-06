@@ -11,20 +11,23 @@ import java.time.LocalDate;
 public class TransactionHistory {
 
     private List<Transaction> transactions; // List to store transactions
-    private double initialBalance;          // Initial balance of the account
-    private double currentBalance;          // Current balance of the account
-    private String username;                // Username for user-specific transactions
+    private double initialBalance; // Initial balance of the account
+    private double currentBalance; // Current balance of the account
+    private double totalSavings;
+    private String username; // Username for user-specific transactions
 
-    // Constructor to initialize transaction history with an initial balance and username
+    // Constructor to initialize transaction history with an initial balance and
+    // username
     public TransactionHistory(double initialBalance, String username) {
         this.transactions = new ArrayList<>();
         this.initialBalance = initialBalance;
         this.currentBalance = initialBalance; // Set the starting balance
         this.username = username;
-        loadTransactionHistory();             // Attempt to load existing transaction history
+        loadTransactionHistory(); // Attempt to load existing transaction history
     }
 
-    public static List<Transaction> filterByDateRange(LocalDate startDate, LocalDate endDate, List<Transaction> transactions) {
+    public static List<Transaction> filterByDateRange(LocalDate startDate, LocalDate endDate,
+            List<Transaction> transactions) {
         return transactions.stream()
                 .filter(t -> !t.getDate().isBefore(startDate) && !t.getDate().isAfter(endDate))
                 .collect(Collectors.toList());
@@ -37,7 +40,8 @@ public class TransactionHistory {
                 .collect(Collectors.toList());
     }
 
-    public static List<Transaction> filterByAmountRange(double minAmount, double maxAmount, List<Transaction> transactions) {
+    public static List<Transaction> filterByAmountRange(double minAmount, double maxAmount,
+            List<Transaction> transactions) {
         return transactions.stream()
                 .filter(t -> t.getAmount() >= minAmount && t.getAmount() <= maxAmount)
                 .collect(Collectors.toList());
@@ -45,13 +49,15 @@ public class TransactionHistory {
 
     public static List<Transaction> sortByDate(boolean newestFirst, List<Transaction> transactions) {
         return transactions.stream()
-                .sorted((t1, t2) -> newestFirst ? t2.getDate().compareTo(t1.getDate()) : t1.getDate().compareTo(t2.getDate()))
+                .sorted((t1, t2) -> newestFirst ? t2.getDate().compareTo(t1.getDate())
+                        : t1.getDate().compareTo(t2.getDate()))
                 .collect(Collectors.toList());
     }
 
     public static List<Transaction> sortByAmount(boolean highestFirst, List<Transaction> transactions) {
         return transactions.stream()
-                .sorted((t1, t2) -> highestFirst ? Double.compare(t2.getAmount(), t1.getAmount()) : Double.compare(t1.getAmount(), t2.getAmount()))
+                .sorted((t1, t2) -> highestFirst ? Double.compare(t2.getAmount(), t1.getAmount())
+                        : Double.compare(t1.getAmount(), t2.getAmount()))
                 .collect(Collectors.toList());
     }
 
@@ -74,11 +80,11 @@ public class TransactionHistory {
     public void viewTransactionHistory(Scanner scanner) {
         System.out.println("\n== History ==");
         System.out.printf("%-15s %-20s %-10s %-10s %-10s\n", "Date", "Description", "Debit", "Credit", "Balance");
-        
+
         if (transactions.isEmpty()) {
             System.out.println("No transaction history available.");
         } else {
-            double currentBalance = 0.0;  // Variable to hold current balance
+            double currentBalance = 0.0; // Variable to hold current balance
             for (Transaction t : transactions) {
                 // Update the current balance based on transaction type
                 if (t.getType() == Transaction.TransactionType.DEBIT) {
@@ -91,7 +97,7 @@ public class TransactionHistory {
                         t.getDate(), t.getDescription(),
                         t.getType() == Transaction.TransactionType.DEBIT ? t.getAmount() : 0.0,
                         t.getType() == Transaction.TransactionType.CREDIT ? t.getAmount() : 0.0,
-                        currentBalance);  // Use the running balance
+                        currentBalance); // Use the running balance
             }
         }
         exportHistoryToCSV();
@@ -159,7 +165,7 @@ public class TransactionHistory {
             if (filteredTransactions.isEmpty()) {
                 System.out.println("No transactions found.");
             } else {
-                double currentBalance = 0.0;  // Variable to hold current balance
+                double currentBalance = 0.0; // Variable to hold current balance
                 for (Transaction t : filteredTransactions) {
                     if (t.getType() == Transaction.TransactionType.DEBIT) {
                         currentBalance += t.getAmount();
@@ -170,7 +176,7 @@ public class TransactionHistory {
                             t.getDate(), t.getDescription(),
                             t.getType() == Transaction.TransactionType.DEBIT ? t.getAmount() : 0.0,
                             t.getType() == Transaction.TransactionType.CREDIT ? t.getAmount() : 0.0,
-                            currentBalance);  // Use the running balance
+                            currentBalance); // Use the running balance
                 }
             }
         }
@@ -178,7 +184,8 @@ public class TransactionHistory {
 
     // Save transaction history to a binary file (user-specific)
     public void saveTransactionHistory() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("transactions_" + username + ".dat"))) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(
+                new FileOutputStream("transactions_" + username + ".dat"))) {
             oos.writeObject(transactions); // Serialize transactions to file
         } catch (IOException e) {
             System.err.println("Error saving transaction history: " + e.getMessage());
@@ -192,7 +199,7 @@ public class TransactionHistory {
             transactions = (List<Transaction>) ois.readObject(); // Deserialize transactions
             recalculateBalance(); // Recalculate balance after loading transactions
         } catch (IOException | ClassNotFoundException e) {
-            //System.out.println("No previous transaction history found. Starting fresh.");
+            // System.out.println("No previous transaction history found. Starting fresh.");
             transactions = new ArrayList<>();
         }
     }
@@ -223,13 +230,24 @@ public class TransactionHistory {
 
     // Recalculate balance after loading history
     private void recalculateBalance() {
-        currentBalance = initialBalance;  // Start with initial balance
+        currentBalance = initialBalance; // Start with initial balance
         for (Transaction t : transactions) {
             if (t.getType() == Transaction.TransactionType.DEBIT) {
                 currentBalance += t.getAmount();
             } else if (t.getType() == Transaction.TransactionType.CREDIT) {
                 currentBalance -= t.getAmount();
             }
+        }
+    }
+
+    public void exportBalanceToCSV(String username, double updatedBalance) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("Accountbalance_" + username + ".csv"))) { // Overwrite
+                                                                                                                  // file
+            writer.write("User ID,Balance,Savings\n");
+            writer.write(String.format("%s,%.2f,%.2f%n", username, updatedBalance, totalSavings));
+            System.out.println("Account balance and savings exported to CSV.");
+        } catch (IOException e) {
+            System.out.println("Error exporting account balance: " + e.getMessage());
         }
     }
 
@@ -246,10 +264,9 @@ public class TransactionHistory {
         return transactions;
     }
 
-    // Update the current balance (used by SavingsSettings)
     public void updateBalance(double newBalance) {
         this.currentBalance = newBalance;
-        System.out.printf("Updated Current Balance: %.2f%n", currentBalance);
+        updateAccountBalanceFile(newBalance);
     }
 
     // Update the initial balance (e.g., on account reset)
@@ -257,12 +274,95 @@ public class TransactionHistory {
         this.initialBalance = newInitialBalance;
         recalculateBalance(); // Recalculate balance based on new initial balance
     }
+
+    public void logTransactionToCSV(String description, double debit, double credit, double updatedBalance) {
+        try (BufferedWriter writer = new BufferedWriter(
+                new FileWriter("transaction_history_" + username + ".csv", true))) { // Append mode
+            String date = java.time.LocalDate.now().toString();
+            writer.write(String.format("%s,%s,%.2f,%.2f,%.2f%n", date, description, debit, credit, updatedBalance));
+            System.out.println("Transaction logged: " + description + " | Debit: " + debit + " | Credit: " + credit
+                    + " | Updated Balance: " + updatedBalance);
+        } catch (IOException e) {
+            System.out.println("Error logging transaction: " + e.getMessage());
+        }
+    }
+
+    private void updateAccountBalanceFile(double currentBalance) {
+        try (PrintWriter balanceWriter = new PrintWriter(new File("accountbalance_" + username + ".csv"))) {
+            balanceWriter.println("Balance,Savings");
+            balanceWriter.printf("%.2f,%.2f%n", currentBalance, totalSavings);
+            System.out.println("Account balance updated to CSV: " + currentBalance);
+        } catch (FileNotFoundException e) {
+            System.err.println("Error updating account balance file: " + e.getMessage());
+        }
+    }
+
+    public void exportHistoryToCSVAndUpdateBalance() {
+        try {
+            double runningBalance = initialBalance;
+
+            try (PrintWriter historyWriter = new PrintWriter(
+                    new FileWriter("transaction_history_" + username + ".csv", true))) {
+                File file = new File("transaction_history_" + username + ".csv");
+                if (file.length() == 0) {
+                    historyWriter.println("Date,Description,Debit,Credit,Balance");
+                }
+
+                for (Transaction t : transactions) {
+                    if (t.getType() == Transaction.TransactionType.DEBIT) {
+                        runningBalance -= t.getAmount();
+                    } else if (t.getType() == Transaction.TransactionType.CREDIT) {
+                        runningBalance += t.getAmount();
+                    }
+                    historyWriter.printf("%s,%s,%.2f,%.2f,%.2f\n", t.getDate(), t.getDescription(),
+                            t.getType() == Transaction.TransactionType.DEBIT ? t.getAmount() : 0.0,
+                            t.getType() == Transaction.TransactionType.CREDIT ? t.getAmount() : 0.0, runningBalance);
+                }
+            }
+
+            updateAccountBalanceFile(runningBalance);
+        } catch (IOException e) {
+            System.err.println("Error exporting transaction history: " + e.getMessage());
+        }
+    }
+
+    public void reloadBalanceFromCSV() {
+        File file = new File("Accountbalance_" + username + ".csv");
+        if (file.exists()) {
+            try (Scanner scanner = new Scanner(file)) {
+                if (scanner.hasNextDouble()) {
+                    this.currentBalance = scanner.nextDouble();
+                }
+            } catch (FileNotFoundException e) {
+                System.out.println("Account balance file not found.");
+            }
+        } else {
+            System.out.println("No account balance file found. Starting with balance of 0.");
+            this.currentBalance = 0;
+        }
+    }
+    
+    public void saveTransaction(double newBalance) {
+        updateBalance(newBalance); // Update the balance in memory
+        exportBalanceToCSV(username, newBalance); // Save the updated balance to CSV
+        saveTransactionHistory(); // Save the updated transaction history to CSV
+        System.out.println("Transaction history and balance updated.");
+    }
+    
+    public void loadBalanceAndSavings() {
+        try (BufferedReader reader = new BufferedReader(new FileReader("Accountbalance_" + username + ".csv"))) {
+            String line = reader.readLine(); // Read header
+            if ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length == 3) {
+                    currentBalance = Double.parseDouble(parts[1]);
+                    totalSavings = Double.parseDouble(parts[2]);
+                }
+            }
+        } catch (IOException e) {
+            //System.out.println("Error loading balance and savings: " + e.getMessage());
+        }
+    }
 }
-
-
-
-
-
-
 
 

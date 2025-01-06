@@ -1,0 +1,3 @@
+LoanId,Username,LoanAmount,InterestRate,Months,RemainingAmount,Status,LoanStartDate,AmountPaid
+1,GroupAlgonauts,5000.00,2.40,36,5187.16,Active,2025-01-06,0.00
+-2093870292,GroupAlgonauts,5000.00,2.4,36,4987.16,Active,2025-01-06,200.00

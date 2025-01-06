@@ -4,3 +4,5 @@ Savings_id,Username,Status,Percentage,Total_Savings
 3,algonauts,Active,10,100.00
 4,algonauts,Active,20,300.00
 5,algonauts,Active,10,310.00
+6,algonauts,Active,10,320.00
+1,algonauts,Inactive,0,0.00

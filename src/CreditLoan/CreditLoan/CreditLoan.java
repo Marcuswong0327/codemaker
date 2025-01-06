@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -126,7 +128,6 @@ public class CreditLoan {
         updateLoanCSV(loanRecord, getUsername());
     }
 
-    
     // Update the loan record in CSV
     public void updateLoanCSV(LoansRecord loanRecord, String username) {
         String loanFilePath = "loans_" + username + ".csv";
@@ -134,7 +135,7 @@ public class CreditLoan {
             // Format loan amount and remaining amount to two decimal places
             String formattedLoanAmount = df.format(loanRecord.getLoanAmount());
             String formattedRemainingAmount = df.format(loanRecord.getRemainingAmount());
-    
+
             // Construct the CSV line
             String loanData = String.join(",",
                     String.valueOf(loanRecord.getLoanId()),
@@ -145,9 +146,8 @@ public class CreditLoan {
                     formattedRemainingAmount,
                     loanRecord.getStatus(),
                     loanRecord.getLoanStartDate(),
-                    df.format(loanRecord.getAmountPaid())
-            );
-    
+                    df.format(loanRecord.getAmountPaid()));
+
             // Write the line to the CSV file
             writer.write(loanData);
             writer.newLine();
@@ -186,14 +186,65 @@ public class CreditLoan {
                         + "Next payment date: " + nextPaymentDate;
                 JOptionPane.showMessageDialog(null, reminderMessage, "Loan Repayment Reminder",
                         JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                System.out.println("Reminder not triggered. Days until repayment: " + daysUntilRepayment); // Debug
             }
-        } else {
-            System.out.println("Loan is already paid. No reminder needed."); // Debug
         }
     }
+    
+    public static CreditLoan loadExistingLoan(String loanFilePath) {
+        try {
+            //System.out.println("Reading loan file: " + loanFilePath);
+            List<String> lines = Files.readAllLines(Paths.get(loanFilePath));
+            if (lines.size() <= 1) {
+                //System.out.println("No loan data available.");
+                return null;
+            }
+    
+            String lastLine = lines.get(lines.size() - 1);
+            String[] fields = lastLine.split(",");
+    
+            if (fields.length < 9) {
+                System.out.println("Error: Expected 9 fields, but found " + fields.length);
+                return null;
+            }
+    
+            //System.out.println("Parsed fields:");
+            for (int i = 0; i < fields.length; i++) {
+                //System.out.println("Field " + i + ": " + fields[i]);
+            }
+    
+            double loanAmount = Double.parseDouble(fields[2]);
+            double interestRate = Double.parseDouble(fields[3]);
+            int months = Integer.parseInt(fields[4]);
+            double remainingAmount = Double.parseDouble(fields[5]);
+            boolean isLoanPaid = fields[6].equalsIgnoreCase("Paid");
+            double amountPaid = Double.parseDouble(fields[8]);
+            String username = fields[1];
+            // Adjust if needed to handle the absence of nextPaymentDate
+            LocalDate nextPaymentDate = LocalDate.now().plusDays(5);
 
+            //LocalDate nextPaymentDate = LocalDate.now().plusMonths(1);
+    
+            CreditLoan loan = new CreditLoan(loanAmount, interestRate, months, username);
+            loan.setRemainingAmount(remainingAmount);
+            loan.setAmountPaid(amountPaid);
+            loan.setIsLoanPaid(isLoanPaid);
+            loan.setNextPaymentDate(nextPaymentDate);
+    
+            //System.out.println("Loaded loan data successfully for user: " + username);
+            return loan;
+        } catch (IOException e) {
+            //System.out.println("Error reading loan file: " + e.getMessage());
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.out.println("Error: Array index out of bounds: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Number format exception: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Unexpected error: " + e.getMessage());
+        }
+        return null;
+    }
+    
+    
     // Loan method (placeholder)
     public void applyLoan() {
         System.out.println("Loan applied successfully!");
@@ -256,4 +307,15 @@ public class CreditLoan {
         this.isLoanPaid = isLoanPaid2;
     }
 
+    public LocalDate getNextPaymentDate() {
+        return nextPaymentDate;
+    }
+
+    public void setNextPaymentDate(LocalDate nextPaymentDate) {
+        this.nextPaymentDate = nextPaymentDate;
+    }
 }
+
+
+
+

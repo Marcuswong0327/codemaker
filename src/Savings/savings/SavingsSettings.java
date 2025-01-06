@@ -23,7 +23,7 @@ public class SavingsSettings {
 
         // Initialize savings file
         this.savingsFile = new File(username + "_savings.csv");
-        
+
         // Fetch the next available savings ID
         this.savingsId = getNextSavingsId(); // Get the next available savings ID
 
@@ -96,15 +96,15 @@ public class SavingsSettings {
     }
 
     public void activateSavings(int percentage) {
-        //System.out.println("Before activation: savingsRecords = " + savingsRecords);
+        // System.out.println("Before activation: savingsRecords = " + savingsRecords);
         isSavingsActive = true;
         savingsPercentage = percentage;
-    
+
         // Update the total savings based on the new percentage
         double totalSavings = (transactionHistory.getCurrentBalance() * percentage) / 100;
-    
+
         System.out.println("Savings activated successfully at " + percentage + "%!");
-    
+
         // Create a new savings record with a unique Savings_id
         SavingsRecord newRecord = new SavingsRecord(
                 getNextSavingsId(), // Unique Savings_id using the next available id
@@ -112,7 +112,7 @@ public class SavingsSettings {
                 "Active",
                 percentage,
                 totalSavings);
-    
+
         // Check if the record with the same username and percentage already exists
         boolean recordExists = false;
         for (SavingsRecord record : savingsRecords) {
@@ -124,18 +124,18 @@ public class SavingsSettings {
                 break;
             }
         }
-    
+
         // If the record does not exist, add it to the list
         if (!recordExists) {
             savingsRecords.add(newRecord);
         }
-    
+
         // Export the updated list of records to the CSV file
-        //System.out.println("Before exporting: savingsRecords = " + savingsRecords);
+        // System.out.println("Before exporting: savingsRecords = " + savingsRecords);
         SavingsCSV savingsCSV = new SavingsCSV(username);
-        //savingsCSV.exportSavings(savingsRecords); // Export all records, ensuring only unique and correct data is written to the file
+        // savingsCSV.exportSavings(savingsRecords); // Export all records, ensuring
+        // only unique and correct data is written to the file
     }
-    
 
     // Automatically transfer savings to balance at the end of the month
     public void autoTransferSavingsToBalance() {
@@ -143,14 +143,36 @@ public class SavingsSettings {
         System.out.printf("Total Savings: %.2f%n", totalSavings);
 
         if (totalSavings > 0.0) {
-            transactionHistory.updateBalance(transactionHistory.getCurrentBalance() + totalSavings);
+            double newBalance = transactionHistory.getCurrentBalance() + totalSavings;
+            transactionHistory.updateBalance(newBalance);
             System.out.printf("Total Savings Transferred: %.2f%n", totalSavings);
+
+            // Log the savings transfer transaction to the transaction history
+            transactionHistory.logTransactionToCSV("Savings Transfer", 0.00, totalSavings, newBalance);
+
+            // Update the balance in memory and file
+            transactionHistory.exportBalanceToCSV(username, newBalance);
+
+            // Save the updated transaction history
+            transactionHistory.saveTransactionHistory();
+
+            // Write a new record for savings transfer
+            String savingsFilePath = "savings_" + username + ".csv";
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(savingsFilePath, true))) { // Append mode
+                writer.write(String.format("%d,%s,Inactive,0,%.2f%n", getNextSavingsId(), username, 0.0));
+                System.out.println("Savings record updated: Inactive, Total Savings set to 0.");
+            } catch (IOException e) {
+                System.out.println("Error updating savings file: " + e.getMessage());
+            }
+
             totalSavings = 0.0; // Reset savings after transfer
         } else {
             System.out.println("No savings to transfer.");
         }
         System.out.printf("New Balance: %.2f%n", transactionHistory.getCurrentBalance());
     }
+
+    
 
     // Getter for savings percentage
     public int getSavingsPercentage() {
@@ -177,7 +199,8 @@ public class SavingsSettings {
             this.savingsPercentage = latestRecord.getPercentage();
             this.totalSavings = latestRecord.getTotalSavings(); // Ensure total savings is updated
         } else {
-            //System.out.println("No previous savings records found. Initializing new savings settings.");
+            // System.out.println("No previous savings records found. Initializing new
+            // savings settings.");
         }
     }
 
@@ -198,7 +221,8 @@ public class SavingsSettings {
 
         // Append the new record
         SavingsCSV savingsCSV = new SavingsCSV(username);
-        //savingsCSV.exportSavings(Collections.singletonList(updatedRecord)); // Wrap the record in a list
+        // savingsCSV.exportSavings(Collections.singletonList(updatedRecord)); // Wrap
+        // the record in a list
 
         // Add the new record to in-memory list
         savingsRecords.add(updatedRecord);
@@ -215,12 +239,12 @@ public class SavingsSettings {
 
     private int getNextSavingsId() {
         int nextId = 1;
-        
+
         if (savingsFile == null || !savingsFile.exists()) {
-            //System.out.println("Error: savingsFile is null or does not exist.");
+            // System.out.println("Error: savingsFile is null or does not exist.");
             return nextId;
         }
-    
+
         try (BufferedReader reader = new BufferedReader(new FileReader(savingsFile))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -235,7 +259,7 @@ public class SavingsSettings {
         } catch (IOException e) {
             System.out.println("Error reading file for next Savings_id: " + e.getMessage());
         }
-        
+
         return nextId;
     }
 }
