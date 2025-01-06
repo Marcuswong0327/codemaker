@@ -61,10 +61,15 @@ public class Debit {
             return null;
         }
 
-        // Input description
-        System.out.print("Enter description: ");
-        scanner.nextLine(); // Clear buffer
-        description = scanner.nextLine();
+        String description;
+        while (true) {
+            System.out.print("Enter description: ");
+            description = scanner.nextLine();
+            if (description.length() > 50) {
+                break; // Exit loop if description is within the limit
+            }
+            System.out.println("Description too long. Please enter a description of 100 characters or fewer.");
+        }
 
         double remainingDebit = debit;
 
@@ -100,3 +105,4 @@ public class Debit {
     }
 
 }
+

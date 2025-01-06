@@ -59,6 +59,8 @@ public class Credit {
             transactionDescription = scanner.nextLine().trim();
             if (transactionDescription.isEmpty()) {
                 System.out.println("Description cannot be empty. Please try again.");
+            } else if (transactionDescription.length() > 50) {
+                System.out.println("Description too long. Please enter a description of 100 characters or fewer.");
             } else {
                 break;
             }

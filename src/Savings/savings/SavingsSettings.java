@@ -46,6 +46,21 @@ public class SavingsSettings {
         return totalSavings;
     }
 
+    // Getter for savings percentage
+    public int getSavingsPercentage() {
+        return savingsPercentage;
+    }
+
+    // Getter for total savings balance
+    public double getSavingsBalance() {
+        return totalSavings;
+    }
+
+    // Getter for active status
+    public boolean isSavingsActive() {
+        return isSavingsActive;
+    }
+
     // Flow to activate and set up savings
     public void activateSavingsFlow() {
         Scanner scanner = new Scanner(System.in);
@@ -172,23 +187,6 @@ public class SavingsSettings {
         System.out.printf("New Balance: %.2f%n", transactionHistory.getCurrentBalance());
     }
 
-    
-
-    // Getter for savings percentage
-    public int getSavingsPercentage() {
-        return savingsPercentage;
-    }
-
-    // Getter for total savings balance
-    public double getSavingsBalance() {
-        return totalSavings;
-    }
-
-    // Getter for active status
-    public boolean isSavingsActive() {
-        return isSavingsActive;
-    }
-
     private void loadPreviousSavingsRecords() {
         SavingsCSV savingsCSV = new SavingsCSV(username);
         this.savingsRecords = savingsCSV.loadSavingsRecords();
@@ -263,4 +261,3 @@ public class SavingsSettings {
         return nextId;
     }
 }
-
