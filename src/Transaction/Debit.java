@@ -61,15 +61,20 @@ public class Debit {
             return null;
         }
 
-        String description;
+        System.out.print("Enter description: ");
+        scanner.nextLine(); // Clear buffer
         while (true) {
-            System.out.print("Enter description: ");
-            description = scanner.nextLine();
+            description = scanner.nextLine().trim();
             if (description.length() > 50) {
-                break; // Exit loop if description is within the limit
+                System.out.println("Description too long. Please enter a description of 50 characters or fewer.");
+                System.out.print("Enter description: ");
+            } else {
+                break;
             }
-            System.out.println("Description too long. Please enter a description of 100 characters or fewer.");
         }
+
+        // Proceed with the rest of the logic
+        System.out.println("Description: " + description);
 
         double remainingDebit = debit;
 
@@ -97,7 +102,8 @@ public class Debit {
             }
 
             // Write the updated records back to the CSV
-            savingsCSV.addSavingsRecord(username, "Active", savingsSettings.getSavingsPercentage(), savingsSettings.getTotalSavings()); // Pass the list of updated records
+            savingsCSV.addSavingsRecord(username, "Active", savingsSettings.getSavingsPercentage(),
+                    savingsSettings.getTotalSavings()); // Pass the list of updated records
         }
 
         // Record the debit transaction
@@ -105,4 +111,3 @@ public class Debit {
     }
 
 }
-

@@ -3,3 +3,4 @@ LoanId,Username,LoanAmount,InterestRate,Months,RemainingAmount,Status,LoanStartD
 630683867,algonauts,10000.00,3.0,36,10369.24,Active,2025-01-03,100.00
 630683867,algonauts,10000.00,3.0,36,10269.24,Active,2025-01-03,200.00
 630683867,algonauts,10000.00,3.0,36,10169.24,Active,2025-01-03,300.00
+630683867,algonauts,10000.00,3.0,36,9969.24,Active,2025-01-08,500.00
