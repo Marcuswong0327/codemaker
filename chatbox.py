@@ -32,8 +32,7 @@ def predict_stroke(features):
 
 # Gemini chat function
 def ask_gemini_about_result(question, features):
-    API_KEY = st.secrets["openrouter_api_key"]
-
+    API_KEY = "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"
 
     headers = {
         "Authorization": f"Bearer {API_KEY}",
@@ -135,13 +134,10 @@ def main():
         else:
             st.success("🟢 No predicted risk of stroke.")
 
-        # 💬 Gemini Chatbox with form
+        # ✨ Gemini Chatbox appears only after prediction
         with st.expander("💬 Ask AI about your health or risk results"):
-            with st.form("ask_gemini_form"):
-                user_q = st.text_input("What do you want to ask Gemini AI?")
-                submitted = st.form_submit_button("Send")
-
-            if submitted and user_q:
+            user_q = st.text_input("What do you want to ask Gemini AI?")
+            if user_q:
                 with st.spinner("Gemini is thinking... 🧠"):
                     reply = ask_gemini_about_result(user_q, features)
                     st.markdown("**🤖 Gemini says:**")
