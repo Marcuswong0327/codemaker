@@ -32,10 +32,13 @@ def predict_stroke(features):
 
 # Gemini chat function
 def ask_gemini_about_result(question, features):
-    API_KEY = "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"
+    api_key = st.secrets.get("openrouter_api_key", None)
+
+    if not api_key:
+        return "❌ API key not found. Please check your Streamlit secrets."
 
     headers = {
-        "Authorization": f"Bearer {API_KEY}",
+        "Authorization": f"Bearer {api_key}",
         "HTTP-Referer": "https://stroke-risk-prediction-grp-1.streamlit.app/",
         "X-Title": "Stroke Risk Chat AI"
     }
@@ -58,12 +61,36 @@ Please explain in simple and friendly terms."""
     }
 
     try:
-        res = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=data)
-        res.raise_for_status()
-        reply = res.json()['choices'][0]['message']['content']
+        # 🚨 Setup timeout, avoid loading
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers=headers,
+            json=data,
+            timeout=15  # ⏱️ maximum timeout is 15 seconds
+        )
+
+        # 💡 显示 HTTP 状态码 + 原始响应文字
+        st.write(f"📡 HTTP status: {response.status_code}")
+        st.code(response.text, language="json")
+
+        # 报错时触发异常
+        response.raise_for_status()
+
+        reply = response.json()['choices'][0]['message']['content']
         return reply
+
+    except requests.exceptions.Timeout:
+        return "⏰ The request to Gemini timed out. Please try again later."
+
+    except requests.exceptions.ConnectionError:
+        return "🌐 Network error! Please check your internet connection."
+
+    except requests.exceptions.HTTPError as e:
+        return f"❌ HTTP error from Gemini: {e}\nResponse: {response.text}"
+
     except Exception as e:
-        return f"❌ Error calling Gemini: {e}"
+        return f"😵 Unexpected error: {e}"
+
 
 # Basic health advice
 def advice_on_values(age, bmi, glucose):
@@ -134,10 +161,13 @@ def main():
         else:
             st.success("🟢 No predicted risk of stroke.")
 
-        # ✨ Gemini Chatbox appears only after prediction
+        # 💬 Gemini Chatbox with form
         with st.expander("💬 Ask AI about your health or risk results"):
-            user_q = st.text_input("What do you want to ask Gemini AI?")
-            if user_q:
+            with st.form("ask_gemini_form"):
+                user_q = st.text_input("What do you want to ask Gemini AI?")
+                submitted = st.form_submit_button("Send")
+
+            if submitted and user_q:
                 with st.spinner("Gemini is thinking... 🧠"):
                     reply = ask_gemini_about_result(user_q, features)
                     st.markdown("**🤖 Gemini says:**")
