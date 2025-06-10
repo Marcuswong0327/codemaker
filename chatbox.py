@@ -34,6 +34,7 @@ def predict_stroke(features):
 def ask_gemini_about_result(question, features):
     API_KEY = "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"
 
+
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "HTTP-Referer": "https://stroke-risk-prediction-grp-1.streamlit.app/",
@@ -134,10 +135,13 @@ def main():
         else:
             st.success("🟢 No predicted risk of stroke.")
 
-        # ✨ Gemini Chatbox appears only after prediction
+        # 💬 Gemini Chatbox with form
         with st.expander("💬 Ask AI about your health or risk results"):
-            user_q = st.text_input("What do you want to ask Gemini AI?")
-            if user_q:
+            with st.form("ask_gemini_form"):
+                user_q = st.text_input("What do you want to ask Gemini AI?")
+                submitted = st.form_submit_button("Send")
+
+            if submitted and user_q:
                 with st.spinner("Gemini is thinking... 🧠"):
                     reply = ask_gemini_about_result(user_q, features)
                     st.markdown("**🤖 Gemini says:**")
