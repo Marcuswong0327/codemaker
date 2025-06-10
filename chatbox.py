@@ -32,7 +32,7 @@ def predict_stroke(features):
 
 # Gemini chat function
 def ask_gemini_about_result(question, features):
-    API_KEY = "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"
+    API_KEY = st.secrets["openrouter_api_key"]
 
 
     headers = {
