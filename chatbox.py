@@ -166,6 +166,7 @@ def main():
                 submitted = st.form_submit_button("Send")
 
             if submitted and user_q:
+                st.write("✅ Submitted question:", user_q)
                 with st.spinner("Gemini is thinking... 🧠"):
                     reply = ask_gemini_about_result(user_q, features)
                     st.markdown("**🤖 Gemini says:**")
