@@ -69,14 +69,12 @@ Please explain in simple and friendly terms."""
             timeout=15  # ⏱️ maximum timeout is 15 seconds
         )
 
-        # 💡 显示 HTTP 状态码 + 原始响应文字
-        st.write(f"📡 HTTP status: {response.status_code}")
-        st.code(response.text, language="json")
-
-        # 报错时触发异常
         response.raise_for_status()
 
         reply = response.json()['choices'][0]['message']['content']
+
+        st.write(f"📡 HTTP status: {response.status_code}")
+        st.code(response.text, language="json")
         return reply
 
     except requests.exceptions.Timeout:
