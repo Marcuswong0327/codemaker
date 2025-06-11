@@ -9,7 +9,7 @@ def test_openrouter_api_key(api_key):
     }
 
     data = {
-        "model": "google/gemini-1.5-flash-pro",
+        "model": "google/gemini-2.5-flash-preview-05-20",
         "messages": [
             {"role": "user", "content": "Say hello in a friendly way!"}
         ]
