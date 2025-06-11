@@ -1,22 +1,30 @@
 import streamlit as st
 import requests
 
-# Function to test Gemini API key using OpenRouter health check
-def test_gemini_api(api_key):
+def test_openrouter_api_key(api_key):
     headers = {
         "Authorization": f"Bearer {api_key}",
         "HTTP-Referer": "https://stroke-risk-prediction-grp-1.streamlit.app/",
-        "X-Title": "Stroke Risk Chat AI"
+        "X-Title": "Test Gemini API Key"
+    }
+
+    data = {
+        "model": "google/gemini-1.5-flash",
+        "messages": [
+            {"role": "user", "content": "Say hello in a friendly way!"}
+        ]
     }
 
     try:
-        response = requests.get(
-            "https://openrouter.ai/api/v1/health",
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
             headers=headers,
+            json=data,
             timeout=15
         )
         response.raise_for_status()
-        return {"success": True, "data": response.json()}
+
+        return {"success": True, "response": response.json()}
 
     except requests.exceptions.HTTPError as e:
         return {
@@ -33,36 +41,35 @@ def test_gemini_api(api_key):
         return {"success": False, "error": f"Unexpected error: {e}"}
 
 
-# Streamlit app UI
 def main():
-    st.title("🔑 Gemini API Key Tester")
+    st.title("🔐 Gemini API Key Tester")
 
     api_key = st.secrets.get("openrouter_api_key", None)
-
     if not api_key:
-        st.error("❌ API key not found. Please add `openrouter_api_key` to your Streamlit secrets.")
+        st.error("❌ API key not found in Streamlit secrets.")
         st.stop()
 
-    st.info("Testing Gemini (OpenRouter) API key...")
+    st.info("Testing Gemini API key via OpenRouter...")
 
-    result = test_gemini_api(api_key)
+    result = test_openrouter_api_key(api_key)
 
     if result["success"]:
-        st.success("✅ Gemini API key is valid and the service is healthy!")
-        st.subheader("🔍 API Response:")
-        st.json(result["data"])
+        st.success("✅ API key is working!")
+        st.subheader("🤖 Gemini says:")
+        reply = result["response"]["choices"][0]["message"]["content"]
+        st.write(reply)
+
     else:
-        st.error("❌ Gemini API key test failed.")
-        st.subheader("🛠️ Error Details:")
-        st.code(result.get("error", "No error message."), language="text")
-        
+        st.error("❌ API key test failed.")
+        st.subheader("⚠️ Error Details:")
+        st.code(result.get("error", "No error provided"), language="text")
         if "response_text" in result:
-            st.subheader("📨 Raw Response:")
+            st.subheader("📨 Response Text:")
             st.code(result["response_text"], language="json")
 
         if "status_code" in result:
             st.write(f"HTTP Status Code: {result['status_code']}")
 
-# Run the app
+
 if __name__ == "__main__":
     main()
