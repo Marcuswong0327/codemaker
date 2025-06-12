@@ -170,10 +170,11 @@ def main():
                 st.success("Form submitted")
                 st.write(f"You asked: {user_input}")
                 st.write("✅ Submitted question:", user_q)
+                
                 with st.spinner("Gemini is thinking... 🧠"):
                     reply = ask_gemini_about_result(user_q, features)
-                    st.markdown("**🤖 Gemini says:**")
-                    st.write(reply)
+                st.markdown("**🤖 Gemini says:**")
+                st.write(reply)
 
 # Run the app
 if __name__ == '__main__':
