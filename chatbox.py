@@ -73,7 +73,6 @@ Please explain in simple and friendly terms."""
 
         reply = response.json()['choices'][0]['message']['content']
 
-        st.write(f"📡 HTTP status: {response.status_code}")
         st.code(response.text, language="json")
         return reply
 
