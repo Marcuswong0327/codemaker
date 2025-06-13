@@ -43,7 +43,7 @@ def ask_deepseek_about_result(question, features):
         "X-Title": "Stroke Risk Chat AI"
     }
 
-    model = "deepseek/deepseek-chat-v3-0324"
+    model = "deepseek/deepseek-chat-v3-0324:free"
     context = "\n".join([f"{k.replace('_', ' ').title()}: {v}" for k, v in features.items()])
 
     prompt = f"""You are a health assistant AI helping users understand their stroke risk. 
