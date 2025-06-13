@@ -31,7 +31,7 @@ def predict_stroke(features):
     return prediction, probability
 
 # Gemini chat function
-def ask_gemini_about_result(question, features):
+def ask_deepseek_about_result(question, features):
     api_key = st.secrets.get("openrouter_api_key", None)
 
     if not api_key:
@@ -43,7 +43,7 @@ def ask_gemini_about_result(question, features):
         "X-Title": "Stroke Risk Chat AI"
     }
 
-    model = "google/gemini-2.5-flash-preview-05-20"
+    model = "deepseek/deepseek-chat-v3-0324"
     context = "\n".join([f"{k.replace('_', ' ').title()}: {v}" for k, v in features.items()])
 
     prompt = f"""You are a health assistant AI helping users understand their stroke risk. 
@@ -156,13 +156,13 @@ def main():
         st.session_state.show_chatbox = True
 
     if st.session_state.show_chatbox:
-        st.title("Ask our LLM anything about your data!!!")
+        st.title("Anything you want to ask our Deepseek agent?")
         
        
-        with st.form("ask_gemini_form"):
-            user_q = st.text_input("Let's start chatting!")
+        with st.form("ask_deepseek_form"):
+            user_q = st.text_input("🤖Let's start chatting!")
             submitted = st.form_submit_button("Send")
-            reply = ask_gemini_about_result(user_q, features)
+            reply = ask_deepseek_about_result(user_q, features)
             st.write(reply)
       
 
