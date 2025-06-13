@@ -145,6 +145,7 @@ def main():
     }
 
     if st.button("Predict"):
+        
         advices = advice_on_values(age, bmi, glucose)
         for adv in advices:
             st.info(adv)
@@ -158,7 +159,9 @@ def main():
             st.error("🔴 You may have a risk of stroke. Please consult a doctor promptly.")
         else:
             st.success("🟢 No predicted risk of stroke.")
+        st.session_state.show_chatbox = True
 
+    if st.session_state.show_chatbox:
         st.title("Chatbox Debug Test")
         
         # 💬 Gemini Chatbox with form
@@ -167,15 +170,15 @@ def main():
                 user_q = st.text_input("What do you want to ask Gemini AI?")
                 submitted = st.form_submit_button("Send")
 
-                if submitted and user_q:
-                    st.success("Form submitted")
-                    st.write(f"You asked: {user_q}")
+            if submitted and user_q:
+                st.success("Form submitted")
+                st.write(f"You asked: {user_q}")
                 
-                    with st.spinner("Gemini is thinking... 🧠"):
-                        reply = ask_gemini_about_result(user_q, features)
+                with st.spinner("Gemini is thinking... 🧠"):
+                    reply = ask_gemini_about_result(user_q, features)
                     st.markdown("**🤖 Gemini says:**")
                     st.write(reply)
-        st.button("Reset")
+      
 
 # Run the app
 if __name__ == '__main__':
