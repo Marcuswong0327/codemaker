@@ -160,6 +160,7 @@ def main():
             st.success("🟢 No predicted risk of stroke.")
 
         st.title("Chatbox Debug Test")
+        
         # 💬 Gemini Chatbox with form
         with st.expander("💬 Ask AI about your health or risk results"):
             with st.form("ask_gemini_form"):
@@ -174,6 +175,7 @@ def main():
                         reply = ask_gemini_about_result(user_q, features)
                     st.markdown("**🤖 Gemini says:**")
                     st.write(reply)
+        st.button("Reset")
 
 # Run the app
 if __name__ == '__main__':
