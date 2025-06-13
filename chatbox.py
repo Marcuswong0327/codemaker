@@ -105,6 +105,8 @@ def advice_on_values(age, bmi, glucose):
 
 # Streamlit UI
 def main():
+    if 'show_chatbox' not in st.session_state:
+        st.session_state.show_chatbox = False;
     st.title("🩺 Stroke Prediction App")
     st.write("Fill in your details below to find out your risk of stroke.")
 
