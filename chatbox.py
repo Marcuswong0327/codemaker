@@ -162,11 +162,9 @@ def main():
         with st.form("ask_gemini_form"):
             user_q = st.text_input("What do you want to ask Gemini AI?")
             submitted = st.form_submit_button("Send")
-
-            with st.spinner("Gemini is thinking... 🧠"):
-                reply = ask_gemini_about_result(user_q, features)
-                st.markdown("**I think...:**")
-                st.write(reply)
+            reply = ask_gemini_about_result(user_q, features)
+            st.markdown("**I think...:**")
+            st.write(reply)
       
 
 # Run the app
