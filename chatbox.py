@@ -75,6 +75,11 @@ Please explain in simple and friendly terms."""
 
         st.code(response.text, language="json")
         return reply
+        
+    except requests.exceptions.Timeout:
+        return "⏰ The request to Gemini timed out. Please try again later."
+   
+
 
 
 # Basic health advice
@@ -93,7 +98,7 @@ def advice_on_values(age, bmi, glucose):
 # Streamlit UI
 def main():
     if 'show_chatbox' not in st.session_state:
-        st.session_state.show_chatbox = False;
+        st.session_state.show_chatbox = False
     st.title("🩺 Stroke Prediction App")
     st.write("Fill in your details below to find out your risk of stroke.")
 
