@@ -160,10 +160,9 @@ def main():
         
        
         with st.form("ask_gemini_form"):
-            user_q = st.text_input("What do you want to ask Gemini AI?")
+            user_q = st.text_input("Let's start chatting!")
             submitted = st.form_submit_button("Send")
             reply = ask_gemini_about_result(user_q, features)
-            st.markdown("**I think...:**")
             st.write(reply)
       
 
