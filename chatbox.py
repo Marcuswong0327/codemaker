@@ -109,10 +109,10 @@ def main():
 
     work_type_dict = {
         0: "children",
-        1: "Govt_job",
+        1: "Govtment job",
         2: "Private",
         3: "Self-employed",
-        4: "Never_worked"
+        4: "Never worked"
     }
     work_type = st.selectbox("Work Type?", list(work_type_dict.keys()), format_func=lambda x: work_type_dict[x])
 
